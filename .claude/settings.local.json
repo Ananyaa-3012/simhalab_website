@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "WebFetch(domain:cerai.iitm.ac.in)",
-      "WebFetch(domain:rbcdsai.iitm.ac.in)"
-    ]
-  }
-}
