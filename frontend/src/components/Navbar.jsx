@@ -1,0 +1,62 @@
+import { useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
+import ThemeToggle from './ThemeToggle'
+import iitmLogo from '../assets/iitm_logo.png'
+import wsaiLogo from '../assets/wsai_logo.png'
+import './Navbar.css'
+
+const navLinks = [
+  { path: '/', label: 'Home' },
+  { path: '/people', label: 'People' },
+  { path: '/research', label: 'Research' },
+  { path: '/publications', label: 'Publications' },
+  { path: '/projects', label: 'Projects' },
+  { path: '/news-events', label: 'News & Events' },
+  { path: '/blog', label: 'Blog' },
+  { path: '/join-us', label: 'Join Us' },
+  { path: '/gallery', label: 'Gallery' },
+  { path: '/contact', label: 'Contact' },
+]
+
+export default function Navbar() {
+  const [menuOpen, setMenuOpen] = useState(false)
+  const location = useLocation()
+
+  return (
+    <nav className="navbar">
+      <div className="navbar-inner">
+        <Link to="/" className="navbar-brand">
+          <span className="navbar-title">SIMHA</span>
+          <span className="navbar-subtitle">IIT Madras</span>
+        </Link>
+
+        <button
+          className="navbar-toggle"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Toggle navigation"
+        >
+          <span className={`hamburger ${menuOpen ? 'open' : ''}`}></span>
+        </button>
+
+        <div className={`navbar-menu ${menuOpen ? 'active' : ''}`}>
+          {navLinks.map(link => (
+            <Link
+              key={link.path}
+              to={link.path}
+              className={`navbar-link ${location.pathname === link.path ? 'active' : ''}`}
+              onClick={() => setMenuOpen(false)}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </div>
+
+        <div className="navbar-right">
+          <ThemeToggle />
+          <img src={iitmLogo} alt="IIT Madras" className="navbar-logo" />
+          <img src={wsaiLogo} alt="WSAI" className="navbar-logo" />
+        </div>
+      </div>
+    </nav>
+  )
+}
