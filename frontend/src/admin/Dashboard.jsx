@@ -6,35 +6,35 @@ import FlowchartEditor from './FlowchartEditor'
 
 // ─── Sidebar Navigation Config ───────────────────────────────────────────────
 const SIDEBAR_ITEMS = [
-  { group: 'HOMEPAGE', items: [
-    { key: 'carousel', label: 'Carousel' },
-    { key: 'lab-head', label: 'Lab Head Message' },
-    { key: 'announcements', label: 'Announcements' },
-  ]},
-  { group: 'CONTENT', items: [
-    { key: 'people', label: 'People' },
-    { key: 'publications', label: 'Publications' },
-    { key: 'research-areas', label: 'Research Areas' },
-    { key: 'projects', label: 'Projects' },
-  ]},
-  { group: 'UPDATES', items: [
+  { group: 'HOME', items: [
+    { key: 'lab-head', label: 'About the Lab' },
     { key: 'news', label: 'News' },
-    { key: 'events', label: 'Events' },
-    { key: 'blog', label: 'Blog' },
+    { key: 'openings', label: 'Openings' },
+    { key: 'site-settings', label: 'Settings' },
+  ]},
+  { group: 'PEOPLE', items: [
+    { key: 'people', label: 'People' },
+  ]},
+  { group: 'RESEARCH', items: [
+    { key: 'research-areas', label: 'Research Areas' },
+    { key: 'publications', label: 'Publications' },
+  ]},
+  { group: 'BLOG', items: [
+    { key: 'blog', label: 'Blog Posts' },
+  ]},
+  { group: 'RESOURCES', items: [
+    { key: 'flowcharts', label: 'Flowcharts' },
+    { key: 'downloads', label: 'Downloads' },
+    { key: 'links', label: 'Links' },
   ]},
   { group: 'MEDIA', items: [
     { key: 'gallery', label: 'Gallery' },
     { key: 'testimonials', label: 'Testimonials' },
     { key: 'sponsors', label: 'Sponsors' },
-    { key: 'links', label: 'Links' },
-  ]},
-  { group: 'JOIN US', items: [
-    { key: 'openings', label: 'Openings' },
-    { key: 'flowcharts', label: 'Flowcharts' },
   ]},
   { group: 'SITE', items: [
     { key: 'contact-info', label: 'Contact Info' },
-    { key: 'site-settings', label: 'Settings' },
+    { key: 'announcements', label: 'Announcements' },
   ]},
 ]
 
@@ -93,7 +93,7 @@ const FORM_CONFIGS = {
       { name: 'role', label: 'Role', type: 'text' },
       { name: 'designation', label: 'Designation', type: 'text' },
       { name: 'department', label: 'Department', type: 'text' },
-      { name: 'category', label: 'Category', type: 'select', options: ['faculty', 'project_associate', 'postdoc', 'phd', 'pg', 'ug', 'alumni'] },
+      { name: 'category', label: 'Category', type: 'select', options: ['faculty', 'postdoc', 'phd', 'ms', 'postbacc', 'project_associate', 'intern', 'alumni'] },
       { name: 'bio_html', label: 'Bio (HTML)', type: 'html' },
       { name: 'research_interests', label: 'Research Interests (JSON array)', type: 'json' },
       { name: 'email', label: 'Email', type: 'text' },
@@ -131,6 +131,21 @@ const FORM_CONFIGS = {
       { name: 'title', label: 'Title', type: 'text', required: true },
       { name: 'description_html', label: 'Description (HTML)', type: 'html' },
       { name: 'image_path', label: 'Image', type: 'image', subdir: 'research-areas' },
+      { name: 'links_json', label: 'Links JSON ([{title, url}])', type: 'json' },
+      { name: 'media_json', label: 'Media JSON ([{type, title, url}])', type: 'json' },
+      { name: 'contact_person_id', label: 'Contact Person ID', type: 'number' },
+      { name: 'display_order', label: 'Display Order', type: 'number' },
+      { name: 'is_active', label: 'Active', type: 'boolean' },
+    ],
+  },
+  downloads: {
+    label: 'Download',
+    listColumns: ['title', 'category', 'is_active'],
+    fields: [
+      { name: 'title', label: 'Title', type: 'text', required: true },
+      { name: 'description', label: 'Description', type: 'textarea' },
+      { name: 'file_url', label: 'File URL', type: 'text', required: true },
+      { name: 'category', label: 'Category', type: 'select', options: ['dataset', 'code', 'paper', 'other'] },
       { name: 'display_order', label: 'Display Order', type: 'number' },
       { name: 'is_active', label: 'Active', type: 'boolean' },
     ],
@@ -280,13 +295,10 @@ const FORM_CONFIGS = {
     ],
   },
   'lab-head': {
-    label: 'Lab Head Message',
+    label: 'About the Lab',
     singleRecord: true,
     fields: [
-      { name: 'name', label: 'Name', type: 'text', required: true },
-      { name: 'title', label: 'Title', type: 'text' },
-      { name: 'photo_path', label: 'Photo', type: 'image', subdir: 'lab-head' },
-      { name: 'message_html', label: 'Message (HTML)', type: 'html' },
+      { name: 'message_html', label: 'Content (HTML)', type: 'html' },
     ],
   },
 }
@@ -615,14 +627,197 @@ function ItemForm({ section, item, onSave, onCancel }) {
   )
 }
 
+// ─── Section Visibility Toggles ─────────────────────────────────────────────
+const VISIBILITY_KEYS = [
+  { key: 'show_about', label: 'Show "About the Lab" section on home page' },
+  { key: 'show_news', label: 'Show "Recent News" section on home page' },
+  { key: 'show_openings', label: 'Show "Openings" section on home page' },
+]
+
+function SiteSettingsPanel({ onRefresh }) {
+  const [settings, setSettings] = useState({})
+  const [allSettings, setAllSettings] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [editKv, setEditKv] = useState(null)
+  const [kvForm, setKvForm] = useState({ key: '', value: '' })
+
+  const load = () => {
+    setLoading(true)
+    api.get('/admin/site-settings')
+      .then(res => {
+        const items = Array.isArray(res.data) ? res.data : []
+        setAllSettings(items)
+        const map = {}
+        items.forEach(s => { map[s.key] = s.value })
+        setSettings(map)
+      })
+      .finally(() => setLoading(false))
+  }
+  useEffect(load, [])
+
+  const saveToggle = async (key, val) => {
+    setSaving(true)
+    try {
+      await api.put('/admin/site-settings', { key, value: val ? '1' : '0' })
+      setSettings(prev => ({ ...prev, [key]: val ? '1' : '0' }))
+    } catch {}
+    setSaving(false)
+  }
+
+  const saveKv = async () => {
+    if (!kvForm.key) return
+    setSaving(true)
+    try {
+      await api.put('/admin/site-settings', { key: kvForm.key, value: kvForm.value })
+      setEditKv(null)
+      load()
+    } catch {}
+    setSaving(false)
+  }
+
+  if (loading) return <p style={{ color: '#ccc' }}>Loading...</p>
+
+  return (
+    <div>
+      {/* Section visibility toggles */}
+      <div style={{ background: '#1e1e1e', borderRadius: '12px', padding: '1.5rem', marginBottom: '2rem' }}>
+        <h3 style={{ color: '#ffde00', fontSize: '1rem', marginBottom: '1rem', fontWeight: 700 }}>
+          Homepage Section Visibility
+        </h3>
+        {VISIBILITY_KEYS.map(({ key, label }) => {
+          const isOn = settings[key] === '1'
+          return (
+            <div key={key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 0', borderBottom: '1px solid #2a2a2a' }}>
+              <span style={{ color: '#ccc', fontSize: '0.9rem' }}>{label}</span>
+              <button
+                onClick={() => saveToggle(key, !isOn)}
+                disabled={saving}
+                style={{
+                  width: '52px', height: '28px', borderRadius: '14px',
+                  border: 'none', cursor: 'pointer', transition: 'background 0.2s',
+                  background: isOn ? '#ffde00' : '#444',
+                  position: 'relative', flexShrink: 0,
+                }}
+              >
+                <span style={{
+                  position: 'absolute', top: '4px',
+                  left: isOn ? '28px' : '4px',
+                  width: '20px', height: '20px', borderRadius: '50%',
+                  background: isOn ? '#000' : '#999',
+                  transition: 'left 0.2s',
+                }} />
+              </button>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* All key-value settings */}
+      <div style={{ background: '#1e1e1e', borderRadius: '12px', padding: '1.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <h3 style={{ color: '#ffde00', fontSize: '1rem', fontWeight: 700 }}>All Site Settings</h3>
+          <button onClick={() => { setEditKv('new'); setKvForm({ key: '', value: '' }) }} style={styles.addBtn}>
+            + Add Setting
+          </button>
+        </div>
+        {editKv && (
+          <div style={{ background: '#2a2a2a', borderRadius: '8px', padding: '1rem', marginBottom: '1rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <input placeholder="Key" value={kvForm.key} onChange={e => setKvForm(p => ({ ...p, key: e.target.value }))}
+              style={{ ...styles.input, flex: 1, minWidth: '140px' }} />
+            <input placeholder="Value" value={kvForm.value} onChange={e => setKvForm(p => ({ ...p, value: e.target.value }))}
+              style={{ ...styles.input, flex: 2, minWidth: '200px' }} />
+            <button onClick={saveKv} disabled={saving} style={styles.submitBtn}>Save</button>
+            <button onClick={() => setEditKv(null)} style={styles.cancelBtnSecondary}>Cancel</button>
+          </div>
+        )}
+        <table style={styles.table}>
+          <thead>
+            <tr>
+              <th style={styles.th}>Key</th>
+              <th style={styles.th}>Value</th>
+              <th style={styles.th}>Edit</th>
+            </tr>
+          </thead>
+          <tbody>
+            {allSettings.map(s => (
+              <tr key={s.id} style={styles.tr}>
+                <td style={{ ...styles.td, fontFamily: 'monospace', fontSize: '0.82rem', color: '#ffde00' }}>{s.key}</td>
+                <td style={{ ...styles.td, maxWidth: '320px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.value}</td>
+                <td style={styles.td}>
+                  <button
+                    onClick={() => { setEditKv(s.id); setKvForm({ key: s.key, value: s.value }) }}
+                    style={styles.editBtn}
+                  >
+                    Edit
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+// ─── People ZIP Upload Component ─────────────────────────────────────────────
+function PeopleZipUpload({ onDone }) {
+  const [file, setFile] = useState(null)
+  const [uploading, setUploading] = useState(false)
+  const [result, setResult] = useState(null)
+
+  const upload = async () => {
+    if (!file) return
+    setUploading(true)
+    const formData = new FormData()
+    formData.append('zip_file', file)
+    try {
+      const res = await api.post('/admin/people/upload-images-zip', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      setResult(res.data)
+      onDone && onDone()
+    } catch (err) {
+      alert('ZIP upload failed: ' + (err.response?.data?.detail || 'Unknown error'))
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  return (
+    <div style={{ background: '#2a2a2a', borderRadius: '8px', padding: '1rem', marginBottom: '1rem' }}>
+      <p style={{ color: '#ccc', fontSize: '0.85rem', marginBottom: '0.5rem', fontWeight: 600 }}>
+        Step 2: Upload Images ZIP
+      </p>
+      <p style={{ color: '#888', fontSize: '0.78rem', marginBottom: '0.75rem' }}>
+        ZIP must contain images named to match the <code style={{ color: '#ffde00' }}>image_filename</code> column in your CSV.
+      </p>
+      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+        <input type="file" accept=".zip" onChange={e => setFile(e.target.files[0])}
+          style={{ color: '#ccc', fontSize: '0.85rem' }} />
+        <button onClick={upload} disabled={!file || uploading} style={styles.addBtn}>
+          {uploading ? 'Uploading...' : 'Upload ZIP'}
+        </button>
+      </div>
+      {result && (
+        <div style={{ marginTop: '0.75rem', color: '#4caf50', fontSize: '0.82rem' }}>
+          Matched {result.matched || 0} images. {result.unmatched > 0 ? `${result.unmatched} not matched.` : ''}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Main Dashboard Component ────────────────────────────────────────────────
 export default function AdminDashboard() {
   const [user, setUser] = useState(null)
-  const [activeSection, setActiveSection] = useState('carousel')
+  const [activeSection, setActiveSection] = useState('lab-head')
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
   const [view, setView] = useState('list') // 'list' | 'create' | 'edit'
   const [editItem, setEditItem] = useState(null)
+  const [showZipUpload, setShowZipUpload] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -712,6 +907,11 @@ export default function AdminDashboard() {
       return <FlowchartEditor />
     }
 
+    // Site settings: custom panel with visibility toggles
+    if (activeSection === 'site-settings') {
+      return <SiteSettingsPanel onRefresh={fetchData} />
+    }
+
     // Single-record sections: show form directly
     if (isSingleRecord) {
       if (loading) return <p style={{ color: '#ccc' }}>Loading...</p>
@@ -745,8 +945,22 @@ export default function AdminDashboard() {
 
     return (
       <div style={styles.tableContainer}>
+        {activeSection === 'people' && showZipUpload && (
+          <PeopleZipUpload onDone={() => { setShowZipUpload(false); fetchData() }} />
+        )}
         <div style={styles.listHeader}>
-          <ImportButton section={activeSection} onImported={fetchData} />
+          <ImportButton
+            section={activeSection}
+            onImported={(result) => {
+              fetchData()
+              if (activeSection === 'people') setShowZipUpload(true)
+            }}
+          />
+          {activeSection === 'people' && !showZipUpload && (
+            <button onClick={() => setShowZipUpload(true)} style={{ ...styles.addBtn, background: '#333', color: '#ffde00', marginRight: 'auto' }}>
+              Upload Images ZIP
+            </button>
+          )}
           <button onClick={handleCreate} style={styles.addBtn}>+ Add New</button>
         </div>
 
@@ -789,7 +1003,7 @@ export default function AdminDashboard() {
     <div style={styles.container}>
       <aside style={styles.sidebar}>
         <div style={styles.sidebarHeader}>
-          <h2 style={styles.sidebarTitle}>SIMHA Admin</h2>
+          <h2 style={styles.sidebarTitle}>SIMHA Lab Admin</h2>
           <p style={styles.sidebarUser}>{user.name}</p>
         </div>
 

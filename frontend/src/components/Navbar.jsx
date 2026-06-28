@@ -9,11 +9,8 @@ const navLinks = [
   { path: '/', label: 'Home' },
   { path: '/people', label: 'People' },
   { path: '/research', label: 'Research' },
-  { path: '/publications', label: 'Publications' },
-  { path: '/projects', label: 'Projects' },
-  { path: '/news-events', label: 'News & Events' },
   { path: '/blog', label: 'Blog' },
-  { path: '/join-us', label: 'Join Us' },
+  { path: '/resources', label: 'Resources' },
   { path: '/gallery', label: 'Gallery' },
   { path: '/contact', label: 'Contact' },
 ]
@@ -26,7 +23,7 @@ export default function Navbar() {
     <nav className="navbar">
       <div className="navbar-inner">
         <Link to="/" className="navbar-brand">
-          <span className="navbar-title">SIMHA</span>
+          <span className="navbar-title">SIMHA Lab</span>
           <span className="navbar-subtitle">IIT Madras</span>
         </Link>
 

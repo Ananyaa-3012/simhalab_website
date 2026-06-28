@@ -1,7 +1,15 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import DOMPurify from 'dompurify'
+import { useParams } from 'react-router-dom'
 import api from '../utils/api'
+import Breadcrumb from '../components/Breadcrumb'
+
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
+function imgSrc(path) {
+  if (!path) return null
+  if (path.startsWith('http')) return path
+  return `${API_BASE}${path}`
+}
 
 export default function BlogPost() {
   const { slug } = useParams()
@@ -10,7 +18,7 @@ export default function BlogPost() {
 
   useEffect(() => {
     api.get(`/public/blog/${slug}`)
-      .then(res => setPost(res.data))
+      .then(r => setPost(r.data))
       .catch(() => setPost(null))
       .finally(() => setLoading(false))
   }, [slug])
@@ -21,21 +29,31 @@ export default function BlogPost() {
   return (
     <section className="section">
       <div className="container" style={{ maxWidth: '800px' }}>
-        <Link to="/blog" style={{ color: '#0066cc', marginBottom: '1rem', display: 'inline-block' }}>&larr; Back to Blog</Link>
+        <Breadcrumb items={[
+          { label: 'Home', path: '/' },
+          { label: 'Blog', path: '/blog' },
+          { label: post.title },
+        ]} />
 
-        {post.cover_image && (
-          <img src={post.cover_image} alt={post.title} style={{ width: '100%', borderRadius: '8px', marginTop: '1rem', marginBottom: '1.5rem' }} />
+        {post.cover_image_path && (
+          <img
+            src={imgSrc(post.cover_image_path)}
+            alt={post.title}
+            style={{ width: '100%', borderRadius: '10px', marginBottom: '1.5rem',
+                     maxHeight: '360px', objectFit: 'cover' }}
+          />
         )}
 
-        <h1 style={{ marginBottom: '0.5rem' }}>{post.title}</h1>
-        <p style={{ color: '#888', marginBottom: '2rem' }}>
-          {post.author && <span>By {post.author} | </span>}
-          {post.date}
+        <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--color-text)', marginBottom: '0.5rem' }}>
+          {post.title}
+        </h1>
+        <p style={{ color: 'var(--color-text-secondary)', marginBottom: '2rem', fontSize: '0.9rem' }}>
+          {post.published_date}
         </p>
 
         <div
-          style={{ lineHeight: 1.8, fontSize: '1.05rem' }}
-          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
+          style={{ lineHeight: 1.85, fontSize: '1.02rem', color: 'var(--color-text)' }}
+          dangerouslySetInnerHTML={{ __html: post.content_html || '' }}
         />
       </div>
     </section>

@@ -9,7 +9,7 @@ export default function Footer() {
       <div className="footer-inner">
         <div className="footer-col">
           <div className="footer-brand">
-            <span className="footer-title">SIMHA</span>
+            <span className="footer-title">SIMHA Lab</span>
             <p className="footer-tagline">Secure Intelligent Models and Hardware Architecture</p>
           </div>
           <div className="footer-logos">
@@ -28,17 +28,15 @@ export default function Footer() {
           <h4>Quick Links</h4>
           <Link to="/people">People</Link>
           <Link to="/research">Research</Link>
-          <Link to="/publications">Publications</Link>
-          <Link to="/projects">Projects</Link>
-          <Link to="/news-events">News & Events</Link>
           <Link to="/blog">Blog</Link>
-          <Link to="/join-us">Join Us</Link>
+          <Link to="/resources">Resources</Link>
           <Link to="/gallery">Gallery</Link>
+          <Link to="/contact">Contact</Link>
         </div>
 
         <div className="footer-col">
           <h4>Contact</h4>
-          <p>SIMHA</p>
+          <p>SIMHA Lab</p>
           <p>Wadhwani School of Data Science and AI</p>
           <p>IIT Madras, Chennai - 600036</p>
           <p>Tamil Nadu, India</p>
@@ -61,7 +59,7 @@ export default function Footer() {
       </div>
 
       <div className="footer-bottom">
-        <p>SIMHA | Wadhwani School of Data Science and AI | IIT Madras &copy; {new Date().getFullYear()}</p>
+        <p>SIMHA Lab | Wadhwani School of Data Science and AI | IIT Madras &copy; {new Date().getFullYear()}</p>
       </div>
     </footer>
   )

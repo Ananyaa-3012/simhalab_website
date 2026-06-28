@@ -10,6 +10,7 @@ from ..models import (
     ResearchArea, Project, Tag, News, Event, GalleryCategory, GalleryImage,
     Testimonial, Sponsor, Link, Opening, Flowchart, FlowchartNode,
     FlowchartEdge, ContactInfo, BlogPost, SiteSetting, PublicationAuthor,
+    Download,
 )
 
 router = APIRouter(prefix="/api/public", tags=["public"])
@@ -120,6 +121,35 @@ def get_research_areas(db: Session = Depends(get_db)):
     return db.query(ResearchArea).filter(
         ResearchArea.is_active == True
     ).order_by(ResearchArea.display_order).all()
+
+
+@router.get("/research-areas/{area_id}")
+def get_research_area(area_id: int, db: Session = Depends(get_db)):
+    from datetime import datetime
+    area = db.query(ResearchArea).filter(
+        ResearchArea.id == area_id, ResearchArea.is_active == True
+    ).first()
+    if not area:
+        raise HTTPException(status_code=404, detail="Research area not found")
+
+    current_year = datetime.now().year
+    min_year = current_year - 2
+    publications = db.query(Publication).filter(
+        Publication.research_area_id == area_id,
+        Publication.year >= min_year,
+    ).order_by(desc(Publication.year), desc(Publication.month)).all()
+
+    contact_person = None
+    if area.contact_person_id:
+        contact_person = db.query(Person).filter(
+            Person.id == area.contact_person_id
+        ).first()
+
+    return {
+        "area": area,
+        "publications": publications,
+        "contact_person": contact_person,
+    }
 
 
 @router.get("/projects")
@@ -250,3 +280,10 @@ def get_contact_info(db: Session = Depends(get_db)):
 def get_site_settings(db: Session = Depends(get_db)):
     settings = db.query(SiteSetting).all()
     return {s.key: s.value for s in settings}
+
+
+@router.get("/downloads")
+def get_downloads(db: Session = Depends(get_db)):
+    return db.query(Download).filter(
+        Download.is_active == True
+    ).order_by(Download.display_order).all()

@@ -1,73 +1,162 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import api from '../utils/api'
 
-const CATEGORIES = [
-  { key: 'faculty', label: 'Faculty' },
-  { key: 'project_associate', label: 'Project Associates' },
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
+function imgSrc(path) {
+  if (!path) return imgSrc('/uploads/people/placeholder.png')
+  if (path.startsWith('http')) return path
+  return `${API_BASE}${path}`
+}
+
+function stripHtml(html) {
+  if (!html) return ''
+  return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+}
+
+const CATEGORY_ORDER = [
+  { key: 'faculty', label: 'Professor' },
   { key: 'postdoc', label: 'Post Doctorate' },
   { key: 'phd', label: 'PhD Scholars' },
-  { key: 'pg', label: 'PG Students' },
-  { key: 'ug', label: 'UG Students' },
-  { key: 'alumni', label: 'Alumni' },
+  { key: 'ms', label: 'MS Students' },
+  { key: 'postbacc', label: 'Post Baccalaureate' },
+  { key: 'project_associate', label: 'Project Associates' },
+  { key: 'intern', label: 'Interns' },
 ]
 
+function PersonCard({ person }) {
+  const bio = stripHtml(person.bio_html)
+  const snippet = bio.length > 120 ? bio.slice(0, 120) + '…' : bio
+
+  return (
+    <div style={{
+      display: 'flex', gap: '1.25rem', alignItems: 'flex-start',
+      padding: '1.25rem', background: 'var(--color-surface)',
+      border: '1px solid var(--color-border)', borderRadius: '10px',
+    }}>
+      <img
+        src={imgSrc(person.photo_path)}
+        alt={person.name}
+        style={{ width: '100px', height: '120px', objectFit: 'cover', borderRadius: '8px',
+                 flexShrink: 0, border: '2px solid var(--color-border)' }}
+      />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--color-text)', marginBottom: '0.2rem' }}>
+          {person.name}
+        </h3>
+        {(person.role || person.designation) && (
+          <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: '0.3rem' }}>
+            {person.role || person.designation}
+          </p>
+        )}
+        {person.department && (
+          <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginBottom: '0.4rem' }}>
+            {person.department}
+          </p>
+        )}
+        {snippet && (
+          <p style={{ fontSize: '0.82rem', color: 'var(--color-text-secondary)', lineHeight: 1.5, marginBottom: '0.5rem' }}>
+            {snippet}
+          </p>
+        )}
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', fontSize: '0.82rem' }}>
+          {person.personal_website_url && (
+            <a href={person.personal_website_url} target="_blank" rel="noopener noreferrer"
+               style={{ color: 'var(--color-secondary)' }}>🔗 Website</a>
+          )}
+          {person.email && (
+            <a href={`mailto:${person.email}`} style={{ color: 'var(--color-secondary)' }}>
+              ✉ {person.email}
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function People() {
-  const [activeTab, setActiveTab] = useState('faculty')
-  const [people, setPeople] = useState([])
-  const [loading, setLoading] = useState(false)
+  const [allPeople, setAllPeople] = useState([])
+  const [search, setSearch] = useState('')
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    setLoading(true)
-    api.get(`/public/people?category=${activeTab}`)
-      .then(res => setPeople(res.data))
-      .catch(() => setPeople([]))
+    api.get('/public/people')
+      .then(r => setAllPeople(r.data || []))
+      .catch(() => {})
       .finally(() => setLoading(false))
-  }, [activeTab])
+  }, [])
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return allPeople
+    const q = search.toLowerCase()
+    return allPeople.filter(p =>
+      p.name?.toLowerCase().includes(q) ||
+      p.role?.toLowerCase().includes(q) ||
+      p.department?.toLowerCase().includes(q) ||
+      p.designation?.toLowerCase().includes(q)
+    )
+  }, [allPeople, search])
+
+  const grouped = useMemo(() => {
+    const map = {}
+    filtered.forEach(p => {
+      if (p.category === 'alumni') return
+      if (!map[p.category]) map[p.category] = []
+      map[p.category].push(p)
+    })
+    return map
+  }, [filtered])
+
+  if (loading) return <div className="section container"><p>Loading...</p></div>
 
   return (
     <section className="section">
       <div className="container">
         <h1 className="section-title">People</h1>
 
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '2rem' }}>
-          {CATEGORIES.map(cat => (
-            <button
-              key={cat.key}
-              className={`btn ${activeTab === cat.key ? 'btn-primary' : ''}`}
-              onClick={() => setActiveTab(cat.key)}
-              style={activeTab !== cat.key ? { background: 'var(--color-surface)', color: 'var(--color-text)' } : {}}
-            >
-              {cat.label}
-            </button>
-          ))}
+        {/* Search bar */}
+        <div style={{ marginBottom: '2rem', maxWidth: '460px' }}>
+          <input
+            type="text"
+            placeholder="Search by name, role, department…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            style={{
+              width: '100%', padding: '0.65rem 1rem',
+              border: '1px solid var(--color-border)', borderRadius: '8px',
+              background: 'var(--color-surface)', color: 'var(--color-text)',
+              fontSize: '0.95rem',
+            }}
+          />
         </div>
 
-        {loading ? (
-          <p style={{ textAlign: 'center' }}>Loading...</p>
-        ) : (
-          <div className="card-grid">
-            {people.map(person => (
-              <div className="card" key={person.id} style={{ textAlign: 'center', padding: '1.5rem' }}>
-                <img
-                  src={person.photo_path || '/uploads/people/placeholder.png'}
-                  alt={person.name}
-                  style={{ width: '120px', height: '120px', borderRadius: '50%', objectFit: 'cover', margin: '0 auto 1rem' }}
-                />
-                <h3 style={{ marginBottom: '0.25rem' }}>{person.name}</h3>
-                {person.designation && <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>{person.designation}</p>}
-                {person.department && <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.85rem' }}>{person.department}</p>}
-                <Link to={`/people/${person.id}`} className="btn btn-primary" style={{ marginTop: '1rem', display: 'inline-block' }}>
-                  View Profile
-                </Link>
+        {CATEGORY_ORDER.map(cat => {
+          const people = grouped[cat.key]
+          if (!people || people.length === 0) return null
+          return (
+            <div key={cat.key} style={{ marginBottom: '2.5rem' }}>
+              <h2 style={{
+                fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-text)',
+                marginBottom: '1rem', paddingBottom: '0.4rem',
+                borderBottom: '2px solid var(--color-primary)',
+              }}>
+                {cat.label}
+              </h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {people.map(p => <PersonCard key={p.id} person={p} />)}
               </div>
-            ))}
-          </div>
-        )}
+            </div>
+          )
+        })}
 
-        {!loading && people.length === 0 && (
-          <p style={{ textAlign: 'center', color: 'var(--color-text-secondary)' }}>No people found in this category.</p>
-        )}
+        {/* Alumni link */}
+        <div style={{ marginTop: '2rem', textAlign: 'center' }}>
+          <Link to="/people/alumni" className="btn btn-outline">
+            View Alumni →
+          </Link>
+        </div>
       </div>
     </section>
   )

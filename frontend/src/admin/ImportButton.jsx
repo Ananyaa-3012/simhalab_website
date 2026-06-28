@@ -31,7 +31,7 @@ export default function ImportButton({ section, onImported }) {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
       setResult(res.data)
-      if (res.data.imported > 0) onImported()
+      if (res.data.imported > 0) onImported(res.data)
     } catch (err) {
       setResult({ imported: 0, skipped: 0, errors: [err.response?.data?.detail || 'Upload failed'] })
     } finally {
@@ -60,6 +60,12 @@ export default function ImportButton({ section, onImported }) {
             <button onClick={downloadTemplate} style={styles.templateBtn}>
               ↓ Download Template CSV
             </button>
+
+            {section === 'people' && (
+              <p style={{ color: '#ea990b', fontSize: '0.78rem', marginBottom: '0.75rem', lineHeight: 1.5 }}>
+                The template includes an <strong>image_filename</strong> column. After importing, use "Upload Images ZIP" to match photos by filename.
+              </p>
+            )}
 
             <div
               onDragOver={e => { e.preventDefault(); setDragOver(true) }}

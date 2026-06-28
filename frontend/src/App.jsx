@@ -3,19 +3,15 @@ import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import Home from './pages/Home'
 import People from './pages/People'
-import PersonDetail from './pages/PersonDetail'
+import Alumni from './pages/Alumni'
 import Research from './pages/Research'
-import Publications from './pages/Publications'
-import Projects from './pages/Projects'
-import NewsEvents from './pages/NewsEvents'
+import ResearchDetail from './pages/ResearchDetail'
 import Blog from './pages/Blog'
 import BlogPost from './pages/BlogPost'
-import JoinUs from './pages/JoinUs'
+import Resources from './pages/Resources'
 import Gallery from './pages/Gallery'
-import Links from './pages/Links'
-import Sponsors from './pages/Sponsors'
-import Testimonials from './pages/Testimonials'
 import Contact from './pages/Contact'
+import NotFound from './pages/NotFound'
 import AdminLogin from './admin/Login'
 import AdminDashboard from './admin/Dashboard'
 
@@ -39,19 +35,26 @@ export default function App() {
       <Route element={<PublicLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/people" element={<People />} />
-        <Route path="/people/:id" element={<PersonDetail />} />
+        <Route path="/people/alumni" element={<Alumni />} />
         <Route path="/research" element={<Research />} />
-        <Route path="/publications" element={<Publications />} />
-        <Route path="/projects" element={<Projects />} />
-        <Route path="/news-events" element={<NewsEvents />} />
+        <Route path="/research/:id" element={<ResearchDetail />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
-        <Route path="/join-us" element={<JoinUs />} />
+        <Route path="/resources" element={<Resources />} />
         <Route path="/gallery" element={<Gallery />} />
-        <Route path="/links" element={<Links />} />
-        <Route path="/sponsors" element={<Sponsors />} />
-        <Route path="/testimonials" element={<Testimonials />} />
         <Route path="/contact" element={<Contact />} />
+
+        {/* Removed routes → 404 */}
+        <Route path="/publications" element={<NotFound />} />
+        <Route path="/projects" element={<NotFound />} />
+        <Route path="/news-events" element={<NotFound />} />
+        <Route path="/join-us" element={<NotFound />} />
+        <Route path="/links" element={<NotFound />} />
+        <Route path="/sponsors" element={<NotFound />} />
+        <Route path="/testimonials" element={<NotFound />} />
+
+        {/* Catch-all */}
+        <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
   )

@@ -16,6 +16,7 @@ from .flowchart import Flowchart, FlowchartNode, FlowchartEdge
 from .contact import ContactInfo
 from .blog import BlogPost
 from .settings import SiteSetting
+from .downloads import Download
 
 __all__ = [
     "AdminUser",
@@ -35,4 +36,5 @@ __all__ = [
     "ContactInfo",
     "BlogPost",
     "SiteSetting",
+    "Download",
 ]

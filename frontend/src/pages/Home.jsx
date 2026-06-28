@@ -1,208 +1,150 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import api from '../utils/api'
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
+function imgSrc(path) {
+  if (!path) return null
+  if (path.startsWith('http')) return path
+  return `${API_BASE}${path}`
+}
+
 export default function Home() {
-  const [carousel, setCarousel] = useState([])
-  const [announcements, setAnnouncements] = useState([])
-  const [labHead, setLabHead] = useState(null)
-  const [researchAreas, setResearchAreas] = useState([])
+  const [settings, setSettings] = useState({})
+  const [about, setAbout] = useState(null)
   const [news, setNews] = useState([])
-  const [sponsors, setSponsors] = useState([])
-  const [currentSlide, setCurrentSlide] = useState(0)
+  const [openings, setOpenings] = useState([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    api.get('/public/carousel').then(res => setCarousel(res.data)).catch(() => {})
-    api.get('/public/announcements').then(res => setAnnouncements(res.data)).catch(() => {})
-    api.get('/public/lab-head').then(res => setLabHead(res.data)).catch(() => {})
-    api.get('/public/research-areas').then(res => setResearchAreas(res.data)).catch(() => {})
-    api.get('/public/news').then(res => {
-      const items = res.data.items || res.data
-      setNews(Array.isArray(items) ? items : [])
-    }).catch(() => {})
-    api.get('/public/sponsors').then(res => setSponsors(res.data)).catch(() => {})
+    Promise.all([
+      api.get('/public/site-settings').then(r => setSettings(r.data)).catch(() => {}),
+      api.get('/public/lab-head').then(r => setAbout(r.data)).catch(() => {}),
+      api.get('/public/news?per_page=6').then(r => setNews(r.data.items || r.data || [])).catch(() => {}),
+      api.get('/public/openings').then(r => setOpenings(r.data || [])).catch(() => {}),
+    ]).finally(() => setLoading(false))
   }, [])
 
-  useEffect(() => {
-    if (carousel.length === 0) return
-    const timer = setInterval(() => {
-      setCurrentSlide(prev => (prev + 1) % carousel.length)
-    }, 5000)
-    return () => clearInterval(timer)
-  }, [carousel.length])
+  const showAbout = settings.show_about !== '0'
+  const showNews = settings.show_news !== '0'
+  const showOpenings = settings.show_openings !== '0'
+  const groupPhoto = settings.group_photo_path
+    ? imgSrc(settings.group_photo_path)
+    : imgSrc('/uploads/carousel/placeholder.png')
 
-  const goToSlide = useCallback((index) => setCurrentSlide(index), [])
+  if (loading) return <div className="section container"><p>Loading...</p></div>
 
   return (
-    <div>
-      {/* Hero Carousel */}
-      {carousel.length > 0 && (
-        <section className="hero-carousel">
-          {carousel.map((slide, idx) => (
-            <div
-              key={slide.id || idx}
-              className={`carousel-slide ${idx === currentSlide ? 'active' : ''}`}
-            >
-              <div
-                className="carousel-bg"
-                style={{ backgroundImage: `url(${slide.image_path})` }}
-              />
-              <div className="carousel-overlay" />
-              <div className="carousel-content">
-                <h1>{slide.title}</h1>
-                {slide.subtitle && <p>{slide.subtitle}</p>}
-                {slide.cta_text && slide.cta_link && (
-                  <Link to={slide.cta_link} className="btn btn-primary" style={{ marginTop: '1.5rem' }}>
-                    {slide.cta_text}
-                  </Link>
-                )}
-              </div>
-            </div>
-          ))}
-          <div className="carousel-dots">
-            {carousel.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => goToSlide(idx)}
-                className={`carousel-dot ${idx === currentSlide ? 'active' : ''}`}
-                aria-label={`Go to slide ${idx + 1}`}
-              />
-            ))}
-          </div>
-        </section>
-      )}
+    <>
+      {/* Group Photo */}
+      <div style={{ width: '100%', height: '380px', overflow: 'hidden', background: '#111' }}>
+        <img
+          src={groupPhoto}
+          alt="SIMHA Lab Group Photo"
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+        />
+      </div>
 
-      {/* Announcement Banner - Marquee */}
-      {announcements.length > 0 && (
-        <div className="announcement-banner">
-          <div className="marquee-track">
-            <div className="marquee-content">
-              {announcements.map((a, idx) => (
-                <span key={a.id || idx}>
-                  <strong>{a.title}</strong>
-                  {a.description && ` — ${a.description}`}
-                  {a.link_url && (
-                    <a href={a.link_url} target="_blank" rel="noopener noreferrer">
-                      {a.link_text || 'Learn More'}
-                    </a>
-                  )}
-                  {idx < announcements.length - 1 && <span className="announcement-separator">|</span>}
-                </span>
-              ))}
-            </div>
-            <div className="marquee-content" aria-hidden="true">
-              {announcements.map((a, idx) => (
-                <span key={`dup-${a.id || idx}`}>
-                  <strong>{a.title}</strong>
-                  {a.description && ` — ${a.description}`}
-                  {a.link_url && (
-                    <a href={a.link_url} target="_blank" rel="noopener noreferrer">
-                      {a.link_text || 'Learn More'}
-                    </a>
-                  )}
-                  {idx < announcements.length - 1 && <span className="announcement-separator">|</span>}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Message from the Lab Head */}
-      {labHead && (
-        <section className="section">
-          <div className="container">
-            <h2 className="section-title">Message from the Professor</h2>
-            <div className="lab-head-section">
-              <img
-                src={labHead.photo_path}
-                alt={labHead.name}
-                className="lab-head-photo"
-              />
-              <div className="lab-head-content">
-                <div dangerouslySetInnerHTML={{ __html: labHead.message_html }} />
-                <p className="lab-head-name">— {labHead.name}</p>
-                <p className="lab-head-title">{labHead.title}</p>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Research Highlights */}
-      {researchAreas.length > 0 && (
+      {/* About the Lab */}
+      {showAbout && about && (
         <section className="section section-alt">
           <div className="container">
-            <h2 className="section-title">Research Highlights</h2>
-            <div className="card-grid">
-              {researchAreas.slice(0, 4).map(area => (
-                <div className="card" key={area.id}>
-                  <img src={area.image_path} alt={area.title} className="card-image" />
-                  <div className="card-body">
-                    <h3>{area.title}</h3>
-                    <p className="card-text">{area.description_html?.replace(/<[^>]*>/g, '').slice(0, 150)}...</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div style={{ textAlign: 'center', marginTop: '2rem' }}>
-              <Link to="/research" className="btn btn-primary">View All Research</Link>
-            </div>
+            <h2 className="section-title">About the Lab</h2>
+            <div
+              style={{ fontSize: '1.05rem', lineHeight: 1.85, color: 'var(--color-text)', maxWidth: '860px' }}
+              dangerouslySetInnerHTML={{ __html: about.message_html }}
+            />
           </div>
         </section>
       )}
 
       {/* Recent News */}
-      {news.length > 0 && (
+      {showNews && news.length > 0 && (
         <section className="section">
           <div className="container">
             <h2 className="section-title">Recent News</h2>
             <div className="card-grid">
-              {news.slice(0, 6).map(item => (
+              {news.map(item => (
                 <div className="card" key={item.id}>
                   {item.image_path && (
-                    <img src={item.image_path} alt={item.title} className="card-image" />
+                    <img src={imgSrc(item.image_path)} alt={item.title} className="card-image" />
                   )}
                   <div className="card-body">
-                    <h4>{item.title}</h4>
+                    <h3 style={{ fontSize: '1rem' }}>{item.title}</h3>
                     <p className="card-date">{item.published_date}</p>
-                    <p className="card-text">{item.summary}</p>
-                    {item.source_name && (
-                      <p className="card-source">Source: {item.source_name}</p>
+                    {item.source_name && <p className="card-source">{item.source_name}</p>}
+                    {item.summary && (
+                      <p className="card-text" style={{ fontSize: '0.875rem', marginTop: '0.5rem' }}>
+                        {item.summary.length > 120 ? item.summary.slice(0, 120) + '…' : item.summary}
+                      </p>
                     )}
+                    <a
+                      href={item.source_url || 'https://example.com'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ display: 'inline-block', marginTop: '0.75rem', fontSize: '0.85rem',
+                               color: 'var(--color-secondary)', fontWeight: 600 }}
+                    >
+                      Read more →
+                    </a>
                   </div>
                 </div>
               ))}
-            </div>
-            <div style={{ textAlign: 'center', marginTop: '2rem' }}>
-              <Link to="/news-events" className="btn btn-outline">View All News</Link>
             </div>
           </div>
         </section>
       )}
 
-      {/* Sponsors Logo Section */}
-      {sponsors.length > 0 && (
+      {/* Openings */}
+      {showOpenings && openings.length > 0 && (
         <section className="section section-alt">
           <div className="container">
-            <h2 className="section-title">Our Sponsors & Collaborators</h2>
-            <div className="sponsors-grid">
-              {sponsors.map(s => (
-                <a
-                  key={s.id}
-                  href={s.website_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="sponsor-item"
+            <h2 className="section-title">Openings</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              {openings.map(opening => (
+                <div
+                  key={opening.id}
+                  style={{
+                    background: 'var(--color-surface)', border: '1px solid var(--color-border)',
+                    borderRadius: '12px', padding: '1.5rem',
+                  }}
                 >
-                  <img src={s.logo_path} alt={s.name} />
-                  <span>{s.name}</span>
-                </a>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <h3 style={{ fontSize: '1.1rem', color: 'var(--color-text)' }}>{opening.position_title}</h3>
+                    <span style={{
+                      background: 'var(--color-primary)', color: '#000',
+                      padding: '0.2rem 0.75rem', borderRadius: '20px',
+                      fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase',
+                    }}>
+                      {opening.position_type}
+                    </span>
+                  </div>
+                  {opening.description_html && (
+                    <div
+                      style={{ marginTop: '0.75rem', color: 'var(--color-text-secondary)', fontSize: '0.9rem', lineHeight: 1.7 }}
+                      dangerouslySetInnerHTML={{ __html: opening.description_html }}
+                    />
+                  )}
+                  <div style={{ marginTop: '1rem', display: 'flex', gap: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                    {opening.deadline && (
+                      <span style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
+                        Deadline: <strong>{opening.deadline}</strong>
+                      </span>
+                    )}
+                    {opening.apply_url && (
+                      <a href={opening.apply_url} target="_blank" rel="noopener noreferrer"
+                         className="btn btn-primary" style={{ padding: '0.45rem 1.25rem', fontSize: '0.85rem' }}>
+                        Apply / Contact →
+                      </a>
+                    )}
+                  </div>
+                </div>
               ))}
             </div>
           </div>
         </section>
       )}
-    </div>
+    </>
   )
 }

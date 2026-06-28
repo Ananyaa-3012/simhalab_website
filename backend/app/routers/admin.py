@@ -1,10 +1,12 @@
 import io
 import csv
+import zipfile
 import pandas as pd
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from typing import Optional
+from pathlib import Path
 
 from ..database import get_db
 from ..auth.jwt import get_current_admin
@@ -13,7 +15,7 @@ from ..models import (
     PublicationAuthor, ResearchArea, Project, Tag, ProjectTag, ProjectMember,
     News, Event, GalleryCategory, GalleryImage, Testimonial, Sponsor, Link,
     Opening, Flowchart, FlowchartNode, FlowchartEdge, ContactInfo, BlogPost,
-    SiteSetting, AdminUser,
+    SiteSetting, AdminUser, Download,
 )
 from ..utils.sanitize import sanitize_html
 from ..utils.upload import save_upload
@@ -37,11 +39,12 @@ IMPORT_CONFIGS = {
         "required": ["name"],
         "fields": ["name","role","designation","department","category","email","phone",
                    "github_url","google_scholar_url","personal_website_url","linkedin_url",
-                   "orcid_url","display_order","is_active"],
+                   "orcid_url","display_order","is_active","image_filename"],
         "booleans": ["is_active"],
         "integers": ["display_order"],
-        "enums": {"category": ["faculty","project_associate","postdoc","phd","pg","ug","alumni"]},
+        "enums": {"category": ["faculty","postdoc","phd","ms","postbacc","project_associate","intern","alumni"]},
         "defaults": {"category": "phd", "is_active": True, "display_order": 0},
+        "virtual_fields": ["image_filename"],  # not stored directly on model
     },
     "publications": {
         "model": Publication,
@@ -155,12 +158,21 @@ async def import_resource(resource: str, file: UploadFile = File(...), db: Sessi
         # Build model kwargs
         kwargs = dict(config.get("defaults", {}))
 
+        virtual_fields = set(config.get("virtual_fields", []))
+        image_filename = None
+
         for field in config["fields"]:
             val = row.get(field)
             if val is None or (isinstance(val, float) and pd.isna(val)):
                 continue
             val = str(val).strip()
             if val == "" or val == "nan":
+                continue
+
+            # Virtual fields — capture but don't pass to model
+            if field in virtual_fields:
+                if field == "image_filename":
+                    image_filename = val
                 continue
 
             # Boolean fields
@@ -199,6 +211,10 @@ async def import_resource(resource: str, file: UploadFile = File(...), db: Sessi
 
         try:
             obj = config["model"](**kwargs)
+            # For people with image_filename, set photo_path to a pending placeholder
+            # (actual image matched when ZIP is uploaded)
+            if image_filename and hasattr(obj, "photo_path") and not obj.photo_path:
+                obj.photo_path = f"/uploads/people/{image_filename}"
             db.add(obj)
             db.commit()
             imported += 1
@@ -989,6 +1005,103 @@ def update_site_settings(data: dict, db: Session = Depends(get_db)):
             db.add(SiteSetting(key=key, value=value))
     db.commit()
     return {"message": "Settings updated"}
+
+
+# --- Downloads ---
+@router.get("/downloads")
+def list_downloads(db: Session = Depends(get_db)):
+    return db.query(Download).order_by(Download.display_order).all()
+
+
+@router.get("/downloads/{item_id}")
+def get_download(item_id: int, db: Session = Depends(get_db)):
+    return _get_or_404(db, Download, item_id)
+
+
+@router.post("/downloads")
+def create_download(data: dict, db: Session = Depends(get_db)):
+    item = Download(**data)
+    db.add(item)
+    db.commit()
+    db.refresh(item)
+    return item
+
+
+@router.put("/downloads/{item_id}")
+def update_download(item_id: int, data: dict, db: Session = Depends(get_db)):
+    item = _get_or_404(db, Download, item_id)
+    for k, v in data.items():
+        if hasattr(item, k):
+            setattr(item, k, v)
+    db.commit()
+    db.refresh(item)
+    return item
+
+
+@router.delete("/downloads/{item_id}")
+def delete_download(item_id: int, db: Session = Depends(get_db)):
+    item = _get_or_404(db, Download, item_id)
+    db.delete(item)
+    db.commit()
+    return {"message": "Deleted"}
+
+
+# --- People Image ZIP Upload ---
+@router.post("/people/upload-images-zip")
+async def upload_people_images_zip(
+    zip_file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+):
+    """
+    Accept a ZIP of images. For each image, if a Person record has a matching
+    image_filename stored in their photo_path as a basename, update their photo_path.
+    Returns list of {filename, saved_path, person_id} for matched files.
+    """
+    ALLOWED_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
+    uploads_dir = Path("uploads/people")
+    uploads_dir.mkdir(parents=True, exist_ok=True)
+
+    zip_bytes = await zip_file.read()
+    results = []
+    try:
+        with zipfile.ZipFile(io.BytesIO(zip_bytes)) as zf:
+            for member in zf.infolist():
+                if member.is_dir():
+                    continue
+                fname = Path(member.filename).name
+                ext = Path(fname).suffix.lower()
+                if ext not in ALLOWED_EXTS:
+                    continue
+                # Validate magic bytes for the first 8 bytes
+                raw = zf.read(member)
+                magic = raw[:8]
+                is_image = (
+                    magic[:4] == b'\x89PNG' or
+                    magic[:2] == b'\xff\xd8' or
+                    magic[:4] in (b'RIFF', b'WEBP') or
+                    magic[:6] in (b'GIF87a', b'GIF89a')
+                )
+                if not is_image:
+                    continue
+
+                dest = uploads_dir / fname
+                dest.write_bytes(raw)
+                saved_path = f"/uploads/people/{fname}"
+
+                # Try to find a person whose photo_path basename matches
+                person = db.query(Person).filter(
+                    Person.photo_path.like(f"%{fname}")
+                ).first()
+                if person:
+                    person.photo_path = saved_path
+                    db.commit()
+                    results.append({"filename": fname, "saved_path": saved_path, "person_id": person.id})
+                else:
+                    results.append({"filename": fname, "saved_path": saved_path, "person_id": None})
+    except zipfile.BadZipFile:
+        raise HTTPException(status_code=400, detail="Invalid ZIP file")
+
+    return {"uploaded": len(results), "files": results}
 
 
 # --- Reorder ---
