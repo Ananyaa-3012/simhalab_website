@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import ThemeToggle from './ThemeToggle'
+import SimhaLogo from './SimhaLogo'
 import iitmLogo from '../assets/iitm_logo.png'
 import wsaiLogo from '../assets/wsai_logo.png'
 import './Navbar.css'
@@ -23,8 +24,11 @@ export default function Navbar() {
     <nav className="navbar">
       <div className="navbar-inner">
         <Link to="/" className="navbar-brand">
-          <span className="navbar-title">SIMHA Lab</span>
-          <span className="navbar-subtitle">IIT Madras</span>
+          <SimhaLogo variant="logo" className="navbar-simha-icon" alwaysDark />
+          <div className="navbar-brand-text">
+            <span className="navbar-title">SIMHA Lab</span>
+            <span className="navbar-subtitle">IIT Madras</span>
+          </div>
         </Link>
 
         <button
@@ -50,8 +54,8 @@ export default function Navbar() {
 
         <div className="navbar-right">
           <ThemeToggle />
-          <img src={iitmLogo} alt="IIT Madras" className="navbar-logo" />
           <img src={wsaiLogo} alt="WSAI" className="navbar-logo" />
+          <img src={iitmLogo} alt="IIT Madras" className="navbar-logo" />
         </div>
       </div>
     </nav>

@@ -62,7 +62,7 @@ export default function ImportButton({ section, onImported }) {
             </button>
 
             {section === 'people' && (
-              <p style={{ color: '#ea990b', fontSize: '0.78rem', marginBottom: '0.75rem', lineHeight: 1.5 }}>
+              <p style={{ color: '#60c0e0', fontSize: '0.78rem', marginBottom: '0.75rem', lineHeight: 1.5 }}>
                 The template includes an <strong>image_filename</strong> column. After importing, use "Upload Images ZIP" to match photos by filename.
               </p>
             )}
@@ -75,10 +75,10 @@ export default function ImportButton({ section, onImported }) {
                 setDragOver(false)
                 handleFile(e.dataTransfer.files[0])
               }}
-              style={{ ...styles.dropZone, borderColor: dragOver ? '#ffde00' : '#444', background: dragOver ? '#2a2a1a' : '#1a1a1a' }}
+              style={{ ...styles.dropZone, borderColor: dragOver ? '#40a0d0' : '#444', background: dragOver ? '#2a2a1a' : '#1a1a1a' }}
             >
               {uploading ? (
-                <span style={{ color: '#ffde00' }}>Importing...</span>
+                <span style={{ color: '#40a0d0' }}>Importing...</span>
               ) : (
                 <>
                   <span style={{ color: '#888', fontSize: '0.9rem' }}>Drag & drop a .csv or .xlsx file here, or</span>
@@ -102,7 +102,7 @@ export default function ImportButton({ section, onImported }) {
                   ✓ {result.imported} row(s) imported
                 </p>
                 {result.skipped > 0 && (
-                  <p style={{ color: '#ea990b' }}>⚠ {result.skipped} row(s) skipped</p>
+                  <p style={{ color: '#60c0e0' }}>⚠ {result.skipped} row(s) skipped</p>
                 )}
                 {result.errors.length > 0 && (
                   <div style={styles.errorList}>
@@ -121,7 +121,7 @@ export default function ImportButton({ section, onImported }) {
 }
 
 const styles = {
-  importBtn: { background: '#2a2a2a', color: '#ffde00', border: '1px solid #444', padding: '0.6rem 1.2rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: '600' },
+  importBtn: { background: '#2a2a2a', color: '#40a0d0', border: '1px solid #444', padding: '0.6rem 1.2rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: '600' },
   backdrop: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' },
   modal: { background: '#1e1e1e', border: '1px solid #333', borderRadius: '12px', padding: '2rem', width: '480px', maxWidth: '90vw' },
   modalHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' },
@@ -129,7 +129,7 @@ const styles = {
   closeBtn: { background: 'none', border: 'none', color: '#888', fontSize: '1.1rem', cursor: 'pointer' },
   templateBtn: { width: '100%', background: '#2a2a2a', border: '1px solid #444', color: '#ccc', padding: '0.6rem', borderRadius: '6px', cursor: 'pointer', marginBottom: '1rem', fontSize: '0.85rem' },
   dropZone: { border: '2px dashed #444', borderRadius: '8px', padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem', transition: 'all 0.2s', marginBottom: '1rem' },
-  browseBtn: { background: '#ffde00', color: '#000', padding: '0.4rem 1.2rem', borderRadius: '4px', fontSize: '0.85rem', fontWeight: '700', cursor: 'pointer' },
+  browseBtn: { background: '#40a0d0', color: '#000', padding: '0.4rem 1.2rem', borderRadius: '4px', fontSize: '0.85rem', fontWeight: '700', cursor: 'pointer' },
   result: { background: '#111', borderRadius: '8px', padding: '1rem' },
   errorList: { marginTop: '0.5rem', maxHeight: '120px', overflowY: 'auto' },
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import api from '../utils/api'
+import SimhaLogo from '../components/SimhaLogo'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
@@ -45,6 +46,13 @@ export default function Home() {
           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
         />
       </div>
+
+      {/* Full Logo */}
+      <section className="section section-alt" style={{ padding: '3rem 0' }}>
+        <div className="container" style={{ textAlign: 'center' }}>
+          <SimhaLogo variant="full" style={{ height: '200px', width: 'auto' }} />
+        </div>
+      </section>
 
       {/* About the Lab */}
       {showAbout && about && (
@@ -113,7 +121,7 @@ export default function Home() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
                     <h3 style={{ fontSize: '1.1rem', color: 'var(--color-text)' }}>{opening.position_title}</h3>
                     <span style={{
-                      background: 'var(--color-primary)', color: '#000',
+                      background: 'var(--color-primary)', color: 'var(--color-primary-contrast)',
                       padding: '0.2rem 0.75rem', borderRadius: '20px',
                       fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase',
                     }}>

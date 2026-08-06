@@ -279,7 +279,7 @@ function SingleEditor({ flowchart, onBack, onSaved }) {
         >
           <Background color="#333" gap={16} />
           <Controls />
-          <MiniMap nodeColor="#ffde00" maskColor="rgba(0,0,0,0.4)" style={{ background: '#1a1a1a' }} />
+          <MiniMap nodeColor="#40a0d0" maskColor="rgba(0,0,0,0.4)" style={{ background: '#1a1a1a' }} />
         </ReactFlow>
 
         {/* Node edit panel */}
@@ -472,19 +472,19 @@ const panelStyles = {
   label: { display: 'block', color: '#bbb', fontSize: '0.75rem', marginBottom: '0.3rem' },
   input: { width: '100%', background: '#2a2a2a', border: '1px solid #444', borderRadius: '4px', padding: '0.5rem', color: '#fff', fontSize: '0.85rem', boxSizing: 'border-box' },
   actions: { display: 'flex', gap: '0.5rem', marginTop: '0.5rem' },
-  saveBtn: { background: '#ffde00', color: '#000', border: 'none', padding: '0.4rem 0.75rem', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 700 },
+  saveBtn: { background: '#40a0d0', color: '#000', border: 'none', padding: '0.4rem 0.75rem', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 700 },
   deleteBtn: { background: '#ff4444', color: '#fff', border: 'none', padding: '0.4rem 0.75rem', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' },
 }
 
 const editorStyles = {
   backBtn: { background: '#333', color: '#ccc', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', whiteSpace: 'nowrap' },
   addNodeBtn: { background: '#2a4a2a', color: '#6bff6b', border: '1px solid #3a6a3a', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', whiteSpace: 'nowrap' },
-  saveBtn: { background: '#ffde00', color: '#000', border: 'none', padding: '0.5rem 1.25rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 700, whiteSpace: 'nowrap' },
+  saveBtn: { background: '#40a0d0', color: '#000', border: 'none', padding: '0.5rem 1.25rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 700, whiteSpace: 'nowrap' },
   cancelBtn: { background: '#333', color: '#ccc', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem' },
   titleInput: { background: '#2a2a2a', border: '1px solid #444', borderRadius: '6px', padding: '0.5rem 0.85rem', color: '#fff', fontSize: '1rem', fontWeight: 600, minWidth: '200px' },
   input: { background: '#1a1a1a', border: '1px solid #444', borderRadius: '6px', padding: '0.6rem 0.85rem', color: '#fff', fontSize: '0.9rem', width: '100%', boxSizing: 'border-box' },
   th: { textAlign: 'left', padding: '0.75rem', color: '#999', borderBottom: '1px solid #333', fontSize: '0.8rem', textTransform: 'uppercase' },
   td: { padding: '0.75rem', color: '#ddd', fontSize: '0.9rem' },
-  editBtn: { background: '#ffde00', color: '#000', border: 'none', padding: '0.3rem 0.75rem', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 },
+  editBtn: { background: '#40a0d0', color: '#000', border: 'none', padding: '0.3rem 0.75rem', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 },
   deleteBtn: { background: '#ff4444', color: '#fff', border: 'none', padding: '0.3rem 0.75rem', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem', marginLeft: '0.5rem' },
 }

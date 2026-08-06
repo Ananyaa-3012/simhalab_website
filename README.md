@@ -144,15 +144,23 @@ Non-secret site metadata: name, institution, contact details, social links.
 
 ## Theme
 
-Supports dark/light mode toggle. Color palette:
+Supports dark/light mode toggle. Color palette derived from the SIMHA logo:
 
-| Color | Hex | Role |
-|-------|-----|------|
-| Gold | `#ffde00` | Primary / CTAs |
-| Amber | `#ea990b` | Secondary / Hover |
-| Tan | `#d6b860` | Tertiary / Borders |
-| Camel | `#c19a6b` | Warm neutral |
-| Black | `#000000` | Navbar / Footer |
+| Mode | Color | Hex | Role |
+|------|-------|-----|------|
+| Light | Navy | `#202040` | Primary / CTAs / Navbar / Footer |
+| Light | Indigo | `#3a3a7a` | Secondary / Hover |
+| Light | Lavender | `#7a7aaa` | Tertiary / Borders |
+| Light | Slate | `#5a5a8a` | Warm neutral |
+| Dark | Teal | `#40a0d0` | Primary / CTAs |
+| Dark | Sky | `#60c0e0` | Secondary / Hover |
+| Dark | Ocean | `#3080a0` | Tertiary / Borders |
+| Dark | Steel | `#50a0b0` | Warm neutral |
+
+### Logo-derived colors
+
+- **Light mode brand**: `#202040` — extracted from the logo text color on white background (`Secure Intelligent Models & Hardware Architectures.png`)
+- **Dark mode brand**: `#40a0d0` — extracted from the logo accent color on black background (`Black Background Update (2).png`)
 
 ## Production Deployment
 

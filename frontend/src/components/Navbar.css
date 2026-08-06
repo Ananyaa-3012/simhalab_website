@@ -18,7 +18,8 @@
 
 .navbar-brand {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
   color: var(--color-primary);
   text-decoration: none;
 }
@@ -27,6 +28,7 @@
   font-size: 1.4rem;
   font-weight: 800;
   letter-spacing: 2px;
+  color: #ffffff;
 }
 
 .navbar-subtitle {
@@ -53,8 +55,18 @@
 
 .navbar-link:hover,
 .navbar-link.active {
-  background: var(--color-primary);
+  background: #40a0d0;
   color: #000000;
+}
+
+.navbar-simha-icon {
+  height: 36px;
+  width: auto;
+}
+
+.navbar-brand-text {
+  display: flex;
+  flex-direction: column;
 }
 
 .navbar-right {
@@ -71,7 +83,7 @@
 
 .theme-toggle {
   background: none;
-  border: 1px solid #555;
+  border: 1px solid #666;
   border-radius: 50%;
   width: 32px;
   height: 32px;
@@ -80,7 +92,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, color 0.2s;
+  color: #cccccc;
 }
 
 .theme-toggle:hover {

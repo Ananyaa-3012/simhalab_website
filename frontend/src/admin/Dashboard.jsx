@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import api from '../utils/api'
 import ImportButton from './ImportButton'
 import FlowchartEditor from './FlowchartEditor'
+import SimhaLogo from '../components/SimhaLogo'
 
 // ─── Sidebar Navigation Config ───────────────────────────────────────────────
 const SIDEBAR_ITEMS = [
@@ -90,10 +91,40 @@ const FORM_CONFIGS = {
     fields: [
       { name: 'name', label: 'Name', type: 'text', required: true },
       { name: 'photo_path', label: 'Photo', type: 'image', subdir: 'people' },
-      { name: 'role', label: 'Role', type: 'text' },
-      { name: 'designation', label: 'Designation', type: 'text' },
+      { name: 'role', label: 'Role', type: 'select', options: [
+        'Head of Department', 'Professor', 'Associate Professor', 'Assistant Professor',
+        'Post Doctorate',
+        'PhD Scholar',
+        'MS Student', 'MTech Student',
+        'BS Student', 'BTech Student', 'BE Student',
+        'Post Baccalaureate Fellow',
+        'Summer Intern', 'Research Intern',
+        'Project Associate', 'Consultant', 'Senior Consultant', 'Senior Project Staff',
+        'Alumni',
+      ] },
+      { name: 'designation', label: 'Designation', type: 'select', options: [
+        'Head of Department', 'Professor', 'Associate Professor', 'Assistant Professor',
+        'Post Doctorate',
+        'PhD Scholar',
+        'MS Student', 'MTech Student',
+        'BS Student', 'BTech Student', 'BE Student',
+        'Post Baccalaureate Fellow',
+        'Summer Intern', 'Research Intern',
+        'Project Associate', 'Consultant', 'Senior Consultant', 'Senior Project Staff',
+        'Alumni',
+      ] },
       { name: 'department', label: 'Department', type: 'text' },
-      { name: 'category', label: 'Category', type: 'select', options: ['faculty', 'postdoc', 'phd', 'ms', 'postbacc', 'project_associate', 'intern', 'alumni'] },
+      { name: 'category', label: 'Category', type: 'select', options: [
+        { value: 'faculty', label: 'Faculty' },
+        { value: 'postdoc', label: 'Post Doctorate' },
+        { value: 'phd', label: 'PhD' },
+        { value: 'postgraduate', label: 'Post Graduate' },
+        { value: 'undergraduate', label: 'Undergraduate' },
+        { value: 'postbacc', label: 'Post Baccalaureate' },
+        { value: 'interns', label: 'Interns' },
+        { value: 'staff', label: 'Staff' },
+        { value: 'alumni', label: 'Alumni' },
+      ] },
       { name: 'bio_html', label: 'Bio (HTML)', type: 'html' },
       { name: 'research_interests', label: 'Research Interests (JSON array)', type: 'json' },
       { name: 'email', label: 'Email', type: 'text' },
@@ -399,7 +430,7 @@ function FormField({ field, value, onChange, error }) {
               type="checkbox"
               checked={!!value}
               onChange={e => onChange(e.target.checked)}
-              style={{ marginRight: '0.5rem', accentColor: '#ffde00' }}
+              style={{ marginRight: '0.5rem', accentColor: '#40a0d0' }}
             />
             {field.label}
           </label>
@@ -416,9 +447,11 @@ function FormField({ field, value, onChange, error }) {
             style={inputStyle}
           >
             <option value="">-- Select --</option>
-            {(field.options || []).map(opt => (
-              <option key={opt} value={opt}>{opt.replace(/_/g, ' ')}</option>
-            ))}
+            {(field.options || []).map(opt => {
+              const val = typeof opt === 'object' ? opt.value : opt
+              const label = typeof opt === 'object' ? opt.label : opt.replace(/_/g, ' ')
+              return <option key={val} value={val}>{label}</option>
+            })}
           </select>
           {error && <span style={styles.errorText}>{error}</span>}
         </div>
@@ -473,12 +506,12 @@ function FormField({ field, value, onChange, error }) {
             }}
             style={{
               ...styles.dropZone,
-              borderColor: dragOver ? '#ffde00' : '#444',
+              borderColor: dragOver ? '#40a0d0' : '#444',
               background: dragOver ? '#2a2a1a' : '#2a2a2a',
             }}
           >
             {uploading ? (
-              <span style={{ color: '#ffde00' }}>Uploading...</span>
+              <span style={{ color: '#40a0d0' }}>Uploading...</span>
             ) : (
               <>
                 <span style={{ color: '#888', fontSize: '0.85rem' }}>
@@ -641,6 +674,7 @@ function SiteSettingsPanel({ onRefresh }) {
   const [saving, setSaving] = useState(false)
   const [editKv, setEditKv] = useState(null)
   const [kvForm, setKvForm] = useState({ key: '', value: '' })
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
 
   const load = () => {
     setLoading(true)
@@ -676,13 +710,34 @@ function SiteSettingsPanel({ onRefresh }) {
     setSaving(false)
   }
 
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadingPhoto(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('content_type', 'carousel')
+      formData.append('filename', 'group_photo' + file.name.match(/\.[^.]+$/)?.[0] || '')
+      const res = await api.post('/admin/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      const path = res.data.path
+      await api.put('/admin/site-settings', { key: 'group_photo_path', value: path })
+      load()
+    } catch (err) {
+      alert('Upload failed: ' + (err.response?.data?.detail || 'Unknown error'))
+    }
+    setUploadingPhoto(false)
+  }
+
   if (loading) return <p style={{ color: '#ccc' }}>Loading...</p>
 
   return (
     <div>
       {/* Section visibility toggles */}
       <div style={{ background: '#1e1e1e', borderRadius: '12px', padding: '1.5rem', marginBottom: '2rem' }}>
-        <h3 style={{ color: '#ffde00', fontSize: '1rem', marginBottom: '1rem', fontWeight: 700 }}>
+        <h3 style={{ color: '#40a0d0', fontSize: '1rem', marginBottom: '1rem', fontWeight: 700 }}>
           Homepage Section Visibility
         </h3>
         {VISIBILITY_KEYS.map(({ key, label }) => {
@@ -696,7 +751,7 @@ function SiteSettingsPanel({ onRefresh }) {
                 style={{
                   width: '52px', height: '28px', borderRadius: '14px',
                   border: 'none', cursor: 'pointer', transition: 'background 0.2s',
-                  background: isOn ? '#ffde00' : '#444',
+                  background: isOn ? '#40a0d0' : '#444',
                   position: 'relative', flexShrink: 0,
                 }}
               >
@@ -713,10 +768,39 @@ function SiteSettingsPanel({ onRefresh }) {
         })}
       </div>
 
+      {/* Group Photo Upload */}
+      <div style={{ background: '#1e1e1e', borderRadius: '12px', padding: '1.5rem', marginBottom: '2rem' }}>
+        <h3 style={{ color: '#40a0d0', fontSize: '1rem', marginBottom: '1rem', fontWeight: 700 }}>
+          Group Photo
+        </h3>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handlePhotoUpload}
+            disabled={uploadingPhoto}
+            style={{ color: '#ccc', fontSize: '0.85rem' }}
+          />
+          <span style={{ color: '#888', fontSize: '0.8rem' }}>
+            {uploadingPhoto ? 'Uploading...' : settings.group_photo_path ? `Current: ${settings.group_photo_path.split('/').pop()}` : 'No photo set'}
+          </span>
+        </div>
+        {settings.group_photo_path && (
+          <div style={{ marginTop: '0.75rem' }}>
+            <img
+              src={settings.group_photo_path}
+              alt="Group Photo"
+              style={{ maxHeight: '120px', borderRadius: '8px', border: '1px solid #333' }}
+              onError={(e) => { e.target.style.display = 'none' }}
+            />
+          </div>
+        )}
+      </div>
+
       {/* All key-value settings */}
       <div style={{ background: '#1e1e1e', borderRadius: '12px', padding: '1.5rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <h3 style={{ color: '#ffde00', fontSize: '1rem', fontWeight: 700 }}>All Site Settings</h3>
+          <h3 style={{ color: '#40a0d0', fontSize: '1rem', fontWeight: 700 }}>All Site Settings</h3>
           <button onClick={() => { setEditKv('new'); setKvForm({ key: '', value: '' }) }} style={styles.addBtn}>
             + Add Setting
           </button>
@@ -742,7 +826,7 @@ function SiteSettingsPanel({ onRefresh }) {
           <tbody>
             {allSettings.map(s => (
               <tr key={s.id} style={styles.tr}>
-                <td style={{ ...styles.td, fontFamily: 'monospace', fontSize: '0.82rem', color: '#ffde00' }}>{s.key}</td>
+                <td style={{ ...styles.td, fontFamily: 'monospace', fontSize: '0.82rem', color: '#40a0d0' }}>{s.key}</td>
                 <td style={{ ...styles.td, maxWidth: '320px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.value}</td>
                 <td style={styles.td}>
                   <button
@@ -791,7 +875,7 @@ function PeopleZipUpload({ onDone }) {
         Step 2: Upload Images ZIP
       </p>
       <p style={{ color: '#888', fontSize: '0.78rem', marginBottom: '0.75rem' }}>
-        ZIP must contain images named to match the <code style={{ color: '#ffde00' }}>image_filename</code> column in your CSV.
+        ZIP must contain images named to match the <code style={{ color: '#40a0d0' }}>image_filename</code> column in your CSV.
       </p>
       <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
         <input type="file" accept=".zip" onChange={e => setFile(e.target.files[0])}
@@ -957,7 +1041,7 @@ export default function AdminDashboard() {
             }}
           />
           {activeSection === 'people' && !showZipUpload && (
-            <button onClick={() => setShowZipUpload(true)} style={{ ...styles.addBtn, background: '#333', color: '#ffde00', marginRight: 'auto' }}>
+            <button onClick={() => setShowZipUpload(true)} style={{ ...styles.addBtn, background: '#333', color: '#40a0d0', marginRight: 'auto' }}>
               Upload Images ZIP
             </button>
           )}
@@ -1002,10 +1086,10 @@ export default function AdminDashboard() {
   return (
     <div style={styles.container}>
       <aside style={styles.sidebar}>
-        <div style={styles.sidebarHeader}>
-          <h2 style={styles.sidebarTitle}>SIMHA Lab Admin</h2>
-          <p style={styles.sidebarUser}>{user.name}</p>
-        </div>
+          <div style={styles.sidebarHeader}>
+            <SimhaLogo variant="logo" style={{ height: '32px', width: 'auto', marginBottom: '0.5rem' }} />
+            <p style={styles.sidebarUser}>{user.name}</p>
+          </div>
 
         <nav style={styles.nav}>
           {SIDEBAR_ITEMS.map(group => (
@@ -1069,12 +1153,12 @@ const styles = {
   container: { display: 'flex', minHeight: '100vh', background: '#0a0a0a' },
   sidebar: { width: '240px', background: '#1a1a1a', padding: '1.5rem 1rem', overflowY: 'auto', borderRight: '1px solid #333', position: 'fixed', top: 0, left: 0, bottom: 0 },
   sidebarHeader: { marginBottom: '2rem', paddingBottom: '1rem', borderBottom: '1px solid #333' },
-  sidebarTitle: { color: '#ffde00', fontSize: '1.2rem', fontWeight: '800', letterSpacing: '1px' },
+  sidebarTitle: { color: '#40a0d0', fontSize: '1.2rem', fontWeight: '800', letterSpacing: '1px' },
   sidebarUser: { color: '#999', fontSize: '0.75rem', marginTop: '0.25rem' },
   nav: { display: 'flex', flexDirection: 'column', gap: '0.25rem' },
   groupTitle: { color: '#666', fontSize: '0.7rem', letterSpacing: '1px', marginTop: '1rem', marginBottom: '0.5rem' },
   navItem: { display: 'block', width: '100%', textAlign: 'left', padding: '0.5rem 0.75rem', background: 'none', border: 'none', color: '#ccc', fontSize: '0.85rem', borderRadius: '6px', cursor: 'pointer', transition: 'background 0.2s' },
-  navItemActive: { background: '#333', color: '#ffde00' },
+  navItemActive: { background: '#333', color: '#40a0d0' },
   logoutBtn: { marginTop: '2rem', width: '100%', padding: '0.6rem', background: '#333', border: 'none', color: '#ff6b6b', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem' },
   main: { flex: 1, padding: '2rem', marginLeft: '240px' },
   mainHeader: { marginBottom: '2rem' },
@@ -1086,8 +1170,8 @@ const styles = {
   tr: { borderBottom: '1px solid #2a2a2a' },
   td: { padding: '0.75rem', color: '#ddd', fontSize: '0.9rem' },
   deleteBtn: { background: '#ff4444', color: '#fff', border: 'none', padding: '0.3rem 0.75rem', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem', marginLeft: '0.5rem' },
-  editBtn: { background: '#ffde00', color: '#000', border: 'none', padding: '0.3rem 0.75rem', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600' },
-  addBtn: { background: '#ffde00', color: '#000', border: 'none', padding: '0.6rem 1.2rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: '700' },
+  editBtn: { background: '#40a0d0', color: '#000', border: 'none', padding: '0.3rem 0.75rem', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600' },
+  addBtn: { background: '#40a0d0', color: '#000', border: 'none', padding: '0.6rem 1.2rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: '700' },
   listHeader: { display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginBottom: '1rem' },
   empty: { color: '#666', textAlign: 'center', padding: '2rem' },
 
@@ -1100,7 +1184,7 @@ const styles = {
   label: { color: '#bbb', fontSize: '0.85rem', fontWeight: '500', marginBottom: '0.2rem' },
   input: { background: '#2a2a2a', border: '1px solid #444', borderRadius: '6px', padding: '0.65rem 0.85rem', color: '#fff', fontSize: '0.9rem', outline: 'none', width: '100%', boxSizing: 'border-box' },
   formActions: { display: 'flex', gap: '1rem', marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid #333' },
-  submitBtn: { background: '#ffde00', color: '#000', border: 'none', padding: '0.7rem 2rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.95rem', fontWeight: '700' },
+  submitBtn: { background: '#40a0d0', color: '#000', border: 'none', padding: '0.7rem 2rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.95rem', fontWeight: '700' },
   cancelBtn: { background: '#333', color: '#ccc', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem' },
   cancelBtnSecondary: { background: '#333', color: '#ccc', border: 'none', padding: '0.7rem 1.5rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.9rem' },
   submitError: { background: '#3d1111', border: '1px solid #ff4444', color: '#ff6b6b', padding: '0.75rem 1rem', borderRadius: '6px', marginBottom: '1rem', fontSize: '0.9rem' },
@@ -1109,5 +1193,5 @@ const styles = {
   previewImg: { width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #444' },
   imagePath: { color: '#888', fontSize: '0.75rem', wordBreak: 'break-all' },
   dropZone: { border: '2px dashed #444', borderRadius: '8px', padding: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem', transition: 'border-color 0.2s, background 0.2s', cursor: 'pointer' },
-  browseBtn: { background: '#ffde00', color: '#000', padding: '0.4rem 1rem', borderRadius: '4px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer' },
+  browseBtn: { background: '#40a0d0', color: '#000', padding: '0.4rem 1rem', borderRadius: '4px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer' },
 }

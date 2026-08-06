@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import SimhaLogo from './SimhaLogo'
 import iitmLogo from '../assets/iitm_logo.png'
 import wsaiLogo from '../assets/wsai_logo.png'
 import './Footer.css'
@@ -9,8 +10,7 @@ export default function Footer() {
       <div className="footer-inner">
         <div className="footer-col">
           <div className="footer-brand">
-            <span className="footer-title">SIMHA Lab</span>
-            <p className="footer-tagline">Secure Intelligent Models and Hardware Architecture</p>
+            <SimhaLogo variant="full" alwaysDark style={{ height: '50px', width: 'auto', maxWidth: '100%' }} />
           </div>
           <div className="footer-logos">
             <img src={iitmLogo} alt="IIT Madras" className="footer-logo" />

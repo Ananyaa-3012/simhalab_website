@@ -1,5 +1,6 @@
 import io
 import csv
+import json
 import zipfile
 import pandas as pd
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
@@ -26,9 +27,9 @@ router = APIRouter(prefix="/api/admin", tags=["admin"], dependencies=[Depends(ge
 
 # --- File Upload ---
 @router.post("/upload")
-async def upload_file(file: UploadFile = File(...), content_type: str = "general", subdir: str = ""):
+async def upload_file(file: UploadFile = File(...), content_type: str = "general", subdir: str = "", filename: str = ""):
     folder = subdir or content_type
-    path = await save_upload(file, folder)
+    path = await save_upload(file, folder, filename=filename or None)
     return {"path": path}
 
 
@@ -387,6 +388,8 @@ def update_person(item_id: int, data: dict, db: Session = Depends(get_db)):
     item = _get_or_404(db, Person, item_id)
     for k, v in data.items():
         if hasattr(item, k):
+            if isinstance(v, (list, dict)):
+                v = json.dumps(v)
             setattr(item, k, v)
     db.commit()
     db.refresh(item)
@@ -396,6 +399,9 @@ def update_person(item_id: int, data: dict, db: Session = Depends(get_db)):
 @router.delete("/people/{item_id}")
 def delete_person(item_id: int, db: Session = Depends(get_db)):
     item = _get_or_404(db, Person, item_id)
+    db.query(ResearchArea).filter(ResearchArea.contact_person_id == item_id).update(
+        {"contact_person_id": None}
+    )
     db.delete(item)
     db.commit()
     return {"message": "Deleted"}
@@ -997,12 +1003,15 @@ def list_site_settings(db: Session = Depends(get_db)):
 
 @router.put("/site-settings")
 def update_site_settings(data: dict, db: Session = Depends(get_db)):
-    for key, value in data.items():
-        setting = db.query(SiteSetting).filter(SiteSetting.key == key).first()
-        if setting:
-            setting.value = value
-        else:
-            db.add(SiteSetting(key=key, value=value))
+    key = data.get("key")
+    value = data.get("value")
+    if not key:
+        return {"error": "Missing key"}
+    setting = db.query(SiteSetting).filter(SiteSetting.key == key).first()
+    if setting:
+        setting.value = value
+    else:
+        db.add(SiteSetting(key=key, value=value))
     db.commit()
     return {"message": "Settings updated"}
 

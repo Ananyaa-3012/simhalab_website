@@ -1,6 +1,7 @@
 import uuid
-import magic
 from pathlib import Path
+
+import magic
 from fastapi import UploadFile, HTTPException
 from ..config import get_settings
 
@@ -11,7 +12,7 @@ ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg"}
 BLOCKED_EXTENSIONS = {".php", ".py", ".sh", ".exe", ".bat", ".cmd", ".js", ".html"}
 
 
-async def save_upload(file: UploadFile, content_type: str = "general") -> str:
+async def save_upload(file: UploadFile, content_type: str = "general", filename: str = None) -> str:
     settings = get_settings()
     max_size = settings.max_upload_size_mb * 1024 * 1024
 
@@ -34,12 +35,15 @@ async def save_upload(file: UploadFile, content_type: str = "general") -> str:
         }
         ext = mime_to_ext.get(detected_mime, ".bin")
 
-    filename = f"{uuid.uuid4().hex}{ext}"
+    if filename:
+        fname = filename
+    else:
+        fname = f"{uuid.uuid4().hex}{ext}"
     upload_dir = Path(settings.upload_dir) / content_type
     upload_dir.mkdir(parents=True, exist_ok=True)
 
-    file_path = upload_dir / filename
+    file_path = upload_dir / fname
     with open(file_path, "wb") as f:
         f.write(content)
 
-    return f"/uploads/{content_type}/{filename}"
+    return f"/uploads/{content_type}/{fname}"

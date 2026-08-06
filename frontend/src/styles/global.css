@@ -1,34 +1,36 @@
 :root,
 [data-theme="light"] {
-  --color-primary: #ffde00;
-  --color-secondary: #ea990b;
-  --color-tertiary: #d6b860;
-  --color-warm: #c19a6b;
+  --color-primary: #202040;
+  --color-primary-contrast: #ffffff;
+  --color-secondary: #3a3a7a;
+  --color-tertiary: #7a7aaa;
+  --color-warm: #5a5a8a;
   --color-background: #ffffff;
-  --color-surface: #faf8f5;
+  --color-surface: #f5f6fa;
   --color-text: #1a1a1a;
   --color-text-secondary: #4a4a4a;
-  --color-navbar: #000000;
-  --color-footer: #000000;
-  --color-border: #e0e0e0;
-  --color-card-shadow: rgba(0, 0, 0, 0.08);
-  --color-section-alt: #f8f9fa;
+  --color-navbar: #202040;
+  --color-footer: #202040;
+  --color-border: #d0d0e0;
+  --color-card-shadow: rgba(32, 32, 64, 0.08);
+  --color-section-alt: #f0f1f8;
 }
 
 [data-theme="dark"] {
-  --color-primary: #ffde00;
-  --color-secondary: #ea990b;
-  --color-tertiary: #d6b860;
-  --color-warm: #c19a6b;
+  --color-primary: #40a0d0;
+  --color-primary-contrast: #000000;
+  --color-secondary: #60c0e0;
+  --color-tertiary: #3080a0;
+  --color-warm: #50a0b0;
   --color-background: #121212;
-  --color-surface: #1e1e1e;
+  --color-surface: #1e1e2e;
   --color-text: #f5f5f5;
-  --color-text-secondary: #b0b0b0;
-  --color-navbar: #0a0a0a;
-  --color-footer: #0a0a0a;
-  --color-border: #333333;
+  --color-text-secondary: #b0b0c0;
+  --color-navbar: #0a0a1a;
+  --color-footer: #0a0a1a;
+  --color-border: #2a2a3e;
   --color-card-shadow: rgba(0, 0, 0, 0.3);
-  --color-section-alt: #1a1a1a;
+  --color-section-alt: #1a1a2e;
 }
 
 * {
@@ -162,12 +164,12 @@ img {
 
 .btn-primary {
   background: var(--color-primary);
-  color: #000000;
+  color: var(--color-primary-contrast);
 }
 
 .btn-primary:hover {
   background: var(--color-secondary);
-  color: #000000;
+  color: var(--color-primary-contrast);
 }
 
 .btn-outline {
@@ -209,7 +211,7 @@ img {
 .carousel-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(10, 10, 30, 0.6);
   backdrop-filter: blur(2px);
 }
 
@@ -269,7 +271,7 @@ img {
 
 /* Announcement Banner - Marquee */
 .announcement-banner {
-  background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+  background: linear-gradient(135deg, #202040 0%, #3a3a5a 100%);
   color: #ffffff;
   padding: 12px 0;
   font-size: 0.9rem;

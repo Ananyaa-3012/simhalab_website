@@ -16,13 +16,15 @@ function stripHtml(html) {
 }
 
 const CATEGORY_ORDER = [
-  { key: 'faculty', label: 'Professor' },
+  { key: 'faculty', label: 'Faculty' },
   { key: 'postdoc', label: 'Post Doctorate' },
   { key: 'phd', label: 'PhD Scholars' },
-  { key: 'ms', label: 'MS Students' },
+  { key: 'postgraduate', label: 'Post Graduate' },
+  { key: 'undergraduate', label: 'Undergraduate' },
   { key: 'postbacc', label: 'Post Baccalaureate' },
-  { key: 'project_associate', label: 'Project Associates' },
-  { key: 'intern', label: 'Interns' },
+  { key: 'interns', label: 'Interns' },
+  { key: 'staff', label: 'Staff' },
+  { key: 'alumni', label: 'Alumni' },
 ]
 
 function PersonCard({ person }) {

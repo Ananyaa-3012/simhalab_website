@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../utils/api'
+import SimhaLogo from '../components/SimhaLogo'
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('admin@simha.iitm.ac.in')
@@ -35,7 +36,10 @@ export default function AdminLogin() {
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <h1 style={styles.title}>SIMHA Admin</h1>
+          <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+            <SimhaLogo variant="logo" style={{ height: '48px', width: 'auto' }} />
+          </div>
+          <h1 style={styles.title}>SIMHA Admin</h1>
         <p style={styles.subtitle}>Secure Intelligent Models and Hardware Architecture</p>
 
         {error && <div style={styles.error}>{error}</div>}
@@ -92,7 +96,7 @@ const styles = {
     boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
   },
   title: {
-    color: '#ffde00',
+    color: '#40a0d0',
     fontSize: '1.8rem',
     fontWeight: '800',
     textAlign: 'center',
@@ -146,7 +150,7 @@ const styles = {
   submitBtn: {
     width: '100%',
     padding: '0.75rem',
-    background: '#ffde00',
+    background: '#40a0d0',
     color: '#000',
     border: 'none',
     borderRadius: '8px',
