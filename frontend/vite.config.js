@@ -3,6 +3,8 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
+  // Sets the base path for GitHub Pages deployment
+  base: '/simhalab_website/',
   server: {
     port: 5173,
     proxy: {

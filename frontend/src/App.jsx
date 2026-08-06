@@ -15,6 +15,15 @@ import NotFound from './pages/NotFound'
 import AdminLogin from './admin/Login'
 import AdminDashboard from './admin/Dashboard'
 
+// Helper utility to construct absolute backend image/file URLs for uploaded assets
+const NGROK_URL = import.meta.env.VITE_API_URL || ''
+
+export const getUploadUrl = (path) => {
+  if (!path) return ''
+  if (path.startsWith('http://') || path.startsWith('https://')) return path
+  return `${NGROK_URL}${path.startsWith('/') ? '' : '/'}${path}`
+}
+
 function PublicLayout() {
   return (
     <>

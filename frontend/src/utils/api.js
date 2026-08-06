@@ -1,9 +1,15 @@
 import axios from 'axios'
 
+// Set ngrok URL dynamically from env or fallback to your current ngrok forwarding URL
+const NGROK_URL = import.meta.env.VITE_API_URL || 'https://<your-ngrok-subdomain>.ngrok-free.app'
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: `${NGROK_URL}/api`,
   withCredentials: true,
-  headers: { 'Content-Type': 'application/json' },
+  headers: {
+    'Content-Type': 'application/json',
+    'ngrok-skip-browser-warning': 'true' // Bypasses ngrok free tier landing page
+  },
 })
 
 api.interceptors.response.use(
@@ -15,7 +21,9 @@ api.interceptors.response.use(
         await api.post('/auth/refresh')
         return api(error.config)
       } catch {
-        window.location.href = '/admin'
+        // Updated redirect to preserve React Router basename on GitHub Pages
+        const basename = import.meta.env.BASE_URL || '/simhalab_website/'
+        window.location.href = `${basename}admin`
       }
     }
     return Promise.reject(error)
