@@ -1,0 +1,25 @@
+name: simha-website
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+    - fastapi
+    - uvicorn[standard]
+    - sqlalchemy
+    - python-jose[cryptography]
+    - python-multipart
+    - slowapi
+    - httpx
+    - pydantic
+    - pydantic-settings
+    - google-auth
+    - google-auth-oauthlib
+    - bleach
+    - python-dotenv
+    - aiofiles
+    - python-magic
+    - openpyxl
+    - pandas
