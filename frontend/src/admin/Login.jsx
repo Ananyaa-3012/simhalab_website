@@ -4,32 +4,15 @@ import api from '../utils/api'
 import SimhaLogo from '../components/SimhaLogo'
 
 export default function AdminLogin() {
-  const [email, setEmail] = useState('admin@simha.iitm.ac.in')
-  const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
-
-  const handleDevLogin = async (e) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-    try {
-      await api.post('/auth/dev-login', { email, password })
-      navigate('/admin/dashboard')
-    } catch (err) {
-      setError(err.response?.data?.detail || 'Login failed')
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const handleGoogleLogin = async () => {
     try {
       const res = await api.get('/auth/login')
       window.location.href = res.data.auth_url
     } catch {
-      setError('Google SSO not configured. Use dev login.')
+      setError('Google SSO login failed. Please check backend OAuth configuration.')
     }
   }
 
@@ -47,32 +30,6 @@ export default function AdminLogin() {
         <button onClick={handleGoogleLogin} style={styles.googleBtn}>
           Sign in with Google
         </button>
-
-        <div style={styles.divider}>
-          <span>or use dev login</span>
-        </div>
-
-        <form onSubmit={handleDevLogin}>
-          <input
-            type="email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            placeholder="Email"
-            style={styles.input}
-            required
-          />
-          <input
-            type="password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            placeholder="Password (default: admin123)"
-            style={styles.input}
-            required
-          />
-          <button type="submit" style={styles.submitBtn} disabled={loading}>
-            {loading ? 'Signing in...' : 'Dev Login'}
-          </button>
-        </form>
       </div>
     </div>
   )
