@@ -3,13 +3,7 @@ import { useParams } from 'react-router-dom'
 import api from '../utils/api'
 import Breadcrumb from '../components/Breadcrumb'
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-
-function imgSrc(path) {
-  if (!path) return null
-  if (path.startsWith('http')) return path
-  return `${API_BASE}${path}`
-}
+import { getUploadUrl } from '../App'
 
 export default function BlogPost() {
   const { slug } = useParams()
@@ -37,7 +31,7 @@ export default function BlogPost() {
 
         {post.cover_image_path && (
           <img
-            src={imgSrc(post.cover_image_path)}
+            src={getUploadUrl(post.cover_image_path)}
             alt={post.title}
             style={{ width: '100%', borderRadius: '10px', marginBottom: '1.5rem',
                      maxHeight: '360px', objectFit: 'cover' }}

@@ -16,7 +16,7 @@ import AdminLogin from './admin/Login'
 import AdminDashboard from './admin/Dashboard'
 
 // Helper utility to construct absolute backend image/file URLs for uploaded assets
-const NGROK_URL = import.meta.env.VITE_API_URL || ''
+const NGROK_URL = import.meta.env.VITE_API_URL || 'https://dejected-married-campsite.ngrok-free.dev'
 
 export const getUploadUrl = (path) => {
   if (!path) return ''

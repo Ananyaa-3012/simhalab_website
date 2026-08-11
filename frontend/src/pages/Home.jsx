@@ -3,13 +3,7 @@ import { Link } from 'react-router-dom'
 import api from '../utils/api'
 import SimhaLogo from '../components/SimhaLogo'
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-
-function imgSrc(path) {
-  if (!path) return null
-  if (path.startsWith('http')) return path
-  return `${API_BASE}${path}`
-}
+import { getUploadUrl } from '../App'
 
 export default function Home() {
   const [settings, setSettings] = useState({})
@@ -31,8 +25,8 @@ export default function Home() {
   const showNews = settings.show_news !== '0'
   const showOpenings = settings.show_openings !== '0'
   const groupPhoto = settings.group_photo_path
-    ? imgSrc(settings.group_photo_path)
-    : imgSrc('/uploads/carousel/placeholder.png')
+    ? getUploadUrl(settings.group_photo_path)
+    : getUploadUrl('/uploads/carousel/placeholder.png')
 
   if (loading) return <div className="section container"><p>Loading...</p></div>
 
@@ -76,7 +70,7 @@ export default function Home() {
               {news.map(item => (
                 <div className="card" key={item.id}>
                   {item.image_path && (
-                    <img src={imgSrc(item.image_path)} alt={item.title} className="card-image" />
+                    <img src={getUploadUrl(item.image_path)} alt={item.title} className="card-image" />
                   )}
                   <div className="card-body">
                     <h3 style={{ fontSize: '1rem' }}>{item.title}</h3>

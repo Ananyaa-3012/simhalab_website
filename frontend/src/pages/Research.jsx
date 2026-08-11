@@ -2,13 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../utils/api'
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-
-function imgSrc(path) {
-  if (!path) return null
-  if (path.startsWith('http')) return path
-  return `${API_BASE}${path}`
-}
+import { getUploadUrl } from '../App'
 
 function stripHtml(html) {
   if (!html) return ''
@@ -63,7 +57,7 @@ export default function Research() {
                 >
                   {area.image_path && (
                     <img
-                      src={imgSrc(area.image_path)}
+                      src={getUploadUrl(area.image_path)}
                       alt={area.title}
                       style={{ width: '200px', height: '140px', objectFit: 'cover',
                                borderRadius: '8px', flexShrink: 0 }}

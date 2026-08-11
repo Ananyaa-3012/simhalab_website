@@ -3,13 +3,7 @@ import { Link } from 'react-router-dom'
 import api from '../utils/api'
 import Breadcrumb from '../components/Breadcrumb'
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-
-function imgSrc(path) {
-  if (!path) return `${API_BASE}/uploads/people/placeholder.png`
-  if (path.startsWith('http')) return path
-  return `${API_BASE}${path}`
-}
+import { getUploadUrl } from '../App'
 
 function stripHtml(html) {
   if (!html) return ''
@@ -27,7 +21,7 @@ function PersonCard({ person }) {
       border: '1px solid var(--color-border)', borderRadius: '10px',
     }}>
       <img
-        src={imgSrc(person.photo_path)}
+        src={getUploadUrl(person.photo_path || '/uploads/people/placeholder.png')}
         alt={person.name}
         style={{ width: '100px', height: '120px', objectFit: 'cover', borderRadius: '8px',
                  flexShrink: 0, border: '2px solid var(--color-border)' }}

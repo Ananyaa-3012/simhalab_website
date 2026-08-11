@@ -2,13 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../utils/api'
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-
-function imgSrc(path) {
-  if (!path) return null
-  if (path.startsWith('http')) return path
-  return `${API_BASE}${path}`
-}
+import { getUploadUrl } from '../App'
 
 export default function Blog() {
   const [posts, setPosts] = useState([])
@@ -54,7 +48,7 @@ export default function Blog() {
               >
                 {post.cover_image_path && (
                   <img
-                    src={imgSrc(post.cover_image_path)}
+                    src={getUploadUrl(post.cover_image_path)}
                     alt={post.title}
                     style={{ width: '200px', height: '140px', objectFit: 'cover',
                              borderRadius: '8px', flexShrink: 0 }}

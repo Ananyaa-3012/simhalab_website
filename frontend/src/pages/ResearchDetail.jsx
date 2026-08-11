@@ -3,13 +3,7 @@ import { useParams } from 'react-router-dom'
 import api from '../utils/api'
 import Breadcrumb from '../components/Breadcrumb'
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-
-function imgSrc(path) {
-  if (!path) return null
-  if (path.startsWith('http')) return path
-  return `${API_BASE}${path}`
-}
+import { getUploadUrl } from '../App'
 
 function Section({ title, children }) {
   return (
@@ -61,7 +55,7 @@ export default function ResearchDetail() {
         {/* Hero */}
         {area.image_path && (
           <div style={{ width: '100%', height: '280px', overflow: 'hidden', borderRadius: '12px', marginBottom: '2rem' }}>
-            <img src={imgSrc(area.image_path)} alt={area.title}
+            <img src={getUploadUrl(area.image_path)} alt={area.title}
               style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
         )}
@@ -165,7 +159,7 @@ export default function ResearchDetail() {
               maxWidth: '480px',
             }}>
               {contact_person.photo_path && (
-                <img src={imgSrc(contact_person.photo_path)} alt={contact_person.name}
+                <img src={getUploadUrl(contact_person.photo_path)} alt={contact_person.name}
                   style={{ width: '56px', height: '56px', objectFit: 'cover', borderRadius: '50%',
                            border: '2px solid var(--color-border)' }} />
               )}
