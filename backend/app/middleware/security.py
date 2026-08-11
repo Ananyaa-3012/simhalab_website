@@ -18,6 +18,6 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             "font-src 'self' https://fonts.gstatic.com; "
             "img-src 'self' data: https:; "
             "frame-src https://www.google.com https://maps.google.com; "
-            "connect-src 'self' https://www.google.com"
+            "connect-src 'self' https://www.google.com https://cdn.jsdelivr.net"
         )
         return response
