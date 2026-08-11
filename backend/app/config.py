@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     allowed_admin_emails: str = ""
     jwt_access_expiry_minutes: int = 15
     jwt_refresh_expiry_days: int = 7
-    cors_origins: str = "http://localhost:5173"
+    cors_origins: str = "http://localhost:5173,https://ananyaa-3012.github.io"
     upload_dir: str = "uploads"
     max_upload_size_mb: int = 10
     dev_admin_password: str = "admin123"
