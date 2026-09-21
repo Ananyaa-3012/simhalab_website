@@ -1,5 +1,6 @@
 import httpx
 from fastapi import APIRouter, Request, Response, HTTPException, Depends
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from datetime import datetime, timezone
@@ -39,7 +40,7 @@ async def login(recaptcha_token: str = ""):
 
 
 @router.get("/callback")
-async def callback(code: str, response: Response, db: Session = Depends(get_db)):
+async def callback(code: str, db: Session = Depends(get_db)):
     async with httpx.AsyncClient() as client:
         token_response = await client.post(
             GOOGLE_TOKEN_URL,
@@ -90,6 +91,7 @@ async def callback(code: str, response: Response, db: Session = Depends(get_db))
     access_token = create_access_token({"sub": email})
     refresh_token = create_refresh_token({"sub": email})
 
+    response = RedirectResponse(url=f"{settings.frontend_url}/admin")
     response.set_cookie(
         key="access_token",
         value=access_token,
@@ -107,7 +109,7 @@ async def callback(code: str, response: Response, db: Session = Depends(get_db))
         max_age=settings.jwt_refresh_expiry_days * 86400,
     )
 
-    return {"message": "Login successful", "user": {"email": email, "name": name}}
+    return response
 
 
 @router.post("/refresh")

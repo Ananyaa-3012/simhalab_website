@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     google_client_id: str = ""
     google_client_secret: str = ""
     google_redirect_uri: str = "http://localhost:8000/api/auth/callback"
+    frontend_url: str = "http://localhost:5173"
     allowed_admin_emails: str = ""
     jwt_access_expiry_minutes: int = 15
     jwt_refresh_expiry_days: int = 7
