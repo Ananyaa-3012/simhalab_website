@@ -15,51 +15,7 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 settings = get_settings()
 
 
-# --- Dev/Testing: Username+Password login ---
-class DevLoginRequest(BaseModel):
-    email: str
-    password: str
-
-
-@router.post("/dev-login")
-async def dev_login(data: DevLoginRequest, response: Response, db: Session = Depends(get_db)):
-    """Username/password login for local testing only.
-    In production, disable by setting DEV_ADMIN_PASSWORD to empty in .env."""
-    dev_password = settings.dev_admin_password
-    if not dev_password:
-        raise HTTPException(status_code=403, detail="Dev login disabled in production")
-
-    if data.password != dev_password:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-
-    if data.email not in settings.allowed_emails_list:
-        raise HTTPException(status_code=403, detail="Email not authorized")
-
-    user = db.query(AdminUser).filter(AdminUser.email == data.email).first()
-    if not user:
-        user = AdminUser(email=data.email, name=data.email.split("@")[0], google_id=None)
-        db.add(user)
-        db.commit()
-        db.refresh(user)
-
-    user.last_login = datetime.now(timezone.utc)
-    db.commit()
-
-    access_token = create_access_token({"sub": data.email})
-    refresh_token = create_refresh_token({"sub": data.email})
-
-    response.set_cookie(
-        key="access_token", value=access_token,
-        httponly=True, secure=False, samesite="lax",
-        max_age=settings.jwt_access_expiry_minutes * 60,
-    )
-    response.set_cookie(
-        key="refresh_token", value=refresh_token,
-        httponly=True, secure=False, samesite="lax",
-        max_age=settings.jwt_refresh_expiry_days * 86400,
-    )
-
-    return {"message": "Login successful", "user": {"email": data.email, "name": user.name}}
+# Google OAuth Configuration
 
 GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
 GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
