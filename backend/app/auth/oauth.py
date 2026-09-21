@@ -91,7 +91,7 @@ async def callback(code: str, db: Session = Depends(get_db)):
     access_token = create_access_token({"sub": email})
     refresh_token = create_refresh_token({"sub": email})
 
-    response = RedirectResponse(url=f"{settings.frontend_url}/admin")
+    response = RedirectResponse(url=f"{settings.frontend_url}/admin/dashboard")
     response.set_cookie(
         key="access_token",
         value=access_token,
